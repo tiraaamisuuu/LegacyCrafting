@@ -32,8 +32,8 @@ final class LegacyControlHint {
         graphics.pose().popMatrix();
 
         int iconWidth = Math.round(button.textureWidth * ICON_SCALE);
-        graphics.text(font, label, x + iconWidth + 2, y, 0xFFE8E8E8, true);
-        return iconWidth + 2 + font.width(label);
+        LegacyText.text(graphics, font, label, x + iconWidth + 2, y, 0xFFE8E8E8, true);
+        return iconWidth + 2 + LegacyText.width(font, label);
     }
 
     enum Button {

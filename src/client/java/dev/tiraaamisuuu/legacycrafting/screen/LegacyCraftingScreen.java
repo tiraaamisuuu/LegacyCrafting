@@ -260,14 +260,16 @@ public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends 
 
     @Override
     protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-        graphics.centeredText(
+        LegacyText.centered(
+            graphics,
             this.font,
             this.selectedCategory.title(),
             this.layout.imageWidth() / 2,
             17,
             LegacyUiStyle.TEXT
         );
-        graphics.centeredText(
+        LegacyText.centered(
+            graphics,
             this.font,
             this.playerInventoryTitle,
             this.layout.inventoryPanelX() + this.layout.inventoryPanelWidth() / 2,

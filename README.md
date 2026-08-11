@@ -19,7 +19,8 @@ extracted from Minecraft Legacy Console Edition. All reused files are credited i
   Mechanisms, Transportation, and Decorations
 - Legacy4J-style grouped recipe strip with vertically selectable recipe variants
 - Four classic crafting-mode tabs and seven category tabs
-- Legacy-style menu audio and Xbox 360 controller prompts
+- Dedicated Legacy menu font, menu audio, and Xbox 360 controller prompts
+- Sharper context-free item rendering with Legacy-style icon padding
 - Large recipe icons, output quantities, ingredient previews, and tooltips
 - Clear visual distinction between craftable and unavailable recipes
 - All Recipes and Craftable filtering

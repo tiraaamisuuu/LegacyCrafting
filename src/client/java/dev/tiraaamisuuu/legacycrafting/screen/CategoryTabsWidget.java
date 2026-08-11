@@ -76,7 +76,7 @@ public final class CategoryTabsWidget extends AbstractWidget {
         if (this.hoveredIndex >= 0) {
             graphics.setTooltipForNextFrame(
                 Minecraft.getInstance().font,
-                this.categories.get(this.hoveredIndex).title(),
+                LegacyText.component(this.categories.get(this.hoveredIndex).title()),
                 mouseX,
                 mouseY
             );

@@ -54,7 +54,7 @@ final class CraftingTypeTabsWidget extends AbstractWidget {
         if (this.hoveredIndex >= 0) {
             graphics.setTooltipForNextFrame(
                 Minecraft.getInstance().font,
-                types[this.hoveredIndex].title(),
+                LegacyText.component(types[this.hoveredIndex].title()),
                 mouseX,
                 mouseY
             );

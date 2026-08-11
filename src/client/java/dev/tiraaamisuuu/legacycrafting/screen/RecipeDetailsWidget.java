@@ -49,7 +49,8 @@ public final class RecipeDetailsWidget extends AbstractWidget {
         Minecraft minecraft = Minecraft.getInstance();
         LegacyUiStyle.insetPanel(graphics, this.getX(), this.getY(), this.getWidth(), this.getHeight(), LegacyUiStyle.PANEL_DARK);
         if (this.recipeView == null) {
-            graphics.centeredText(
+            LegacyText.centered(
+                graphics,
                 minecraft.font,
                 Component.translatable("legacycrafting.recipe.none"),
                 this.getX() + this.getWidth() / 2,
@@ -60,7 +61,8 @@ public final class RecipeDetailsWidget extends AbstractWidget {
         }
 
         BrowserRecipe recipe = this.recipeView.recipe();
-        graphics.centeredText(
+        LegacyText.centered(
+            graphics,
             minecraft.font,
             recipe.output().getHoverName(),
             this.getX() + this.getWidth() / 2,
@@ -93,11 +95,7 @@ public final class RecipeDetailsWidget extends AbstractWidget {
             if (!alternatives.isEmpty()) {
                 int cycle = (int)((System.currentTimeMillis() / 1000L) % alternatives.size());
                 ItemStack stack = alternatives.get(cycle);
-                graphics.pose().pushMatrix();
-                graphics.pose().translate(slotX, slotY);
-                graphics.pose().scale(INGREDIENT_SLOT_SIZE / 18.0F, INGREDIENT_SLOT_SIZE / 18.0F);
-                graphics.item(stack, 0, 0);
-                graphics.pose().popMatrix();
+                LegacyItemRenderer.render(graphics, stack, slotX, slotY, INGREDIENT_SLOT_SIZE, cycle);
                 if (missing) {
                     LegacyUiStyle.warning(graphics, slotX, slotY);
                 }
@@ -122,12 +120,19 @@ public final class RecipeDetailsWidget extends AbstractWidget {
         int outputX = this.getX() + this.layout.craftingResultX();
         int outputY = this.getY() + 48;
         LegacyUiStyle.slot(graphics, outputX, outputY, outputSize, false, !this.recipeView.craftable());
-        graphics.pose().pushMatrix();
-        graphics.pose().translate(outputX, outputY);
-        graphics.pose().scale(outputSize / 18.0F, outputSize / 18.0F);
-        graphics.item(recipe.output(), 0, 0);
-        graphics.itemDecorations(minecraft.font, recipe.output(), 0, 0);
-        graphics.pose().popMatrix();
+        LegacyItemRenderer.render(graphics, recipe.output(), outputX, outputY, outputSize, 0);
+        if (recipe.output().getCount() > 1) {
+            Component count = Component.literal(Integer.toString(recipe.output().getCount()));
+            LegacyText.text(
+                graphics,
+                minecraft.font,
+                count,
+                outputX + outputSize - LegacyText.width(minecraft.font, count) - 2,
+                outputY + outputSize - 9,
+                0xFFFFFFFF,
+                true
+            );
+        }
         if (contains(mouseX, mouseY, outputX, outputY, outputSize)) {
             graphics.setTooltipForNextFrame(minecraft.font, recipe.output(), mouseX, mouseY);
         }

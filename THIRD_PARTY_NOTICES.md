@@ -2,8 +2,8 @@
 
 ## Legacy4J
 
-LegacyCrafting includes selected GUI sprites, crafting-menu ordering data, and
-menu sounds from **Legacy4J**:
+LegacyCrafting includes selected GUI sprites, the Legacy 11px font sheet,
+crafting-menu ordering data, and menu sounds from **Legacy4J**:
 https://github.com/Wilyicaro/Legacy-Minecraft
 
 MIT License

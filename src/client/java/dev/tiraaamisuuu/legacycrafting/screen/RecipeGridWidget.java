@@ -140,11 +140,7 @@ public final class RecipeGridWidget extends AbstractWidget {
 
     private void renderRecipe(GuiGraphicsExtractor graphics, RecipeView recipe, int x, int y, int seed) {
         ItemStack output = recipe.recipe().output();
-        graphics.pose().pushMatrix();
-        graphics.pose().translate(x, y);
-        graphics.pose().scale(CELL_SIZE / 18.0F, CELL_SIZE / 18.0F);
-        graphics.item(output, 0, 0, seed);
-        graphics.pose().popMatrix();
+        LegacyItemRenderer.render(graphics, output, x, y, CELL_SIZE, seed);
         if (!recipe.craftable()) {
             graphics.fill(x + 2, y + 2, x + CELL_SIZE - 2, y + CELL_SIZE - 2, UNCRAFTABLE_OVERLAY);
         }
