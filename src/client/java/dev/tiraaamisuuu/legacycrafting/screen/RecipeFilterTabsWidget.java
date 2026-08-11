@@ -1,6 +1,7 @@
 package dev.tiraaamisuuu.legacycrafting.screen;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.tiraaamisuuu.legacycrafting.client.LegacyUiSounds;
 import java.util.function.Consumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -92,6 +93,7 @@ public final class RecipeFilterTabsWidget extends AbstractWidget {
         if (this.craftableOnly != craftableOnly) {
             this.craftableOnly = craftableOnly;
             this.onChanged.accept(craftableOnly);
+            LegacyUiSounds.play(LegacyUiSounds.Cue.FOCUS);
         }
     }
 

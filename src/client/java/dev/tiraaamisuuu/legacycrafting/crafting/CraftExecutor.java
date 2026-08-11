@@ -24,6 +24,7 @@ public final class CraftExecutor {
     private final AbstractCraftingMenu menu;
     private final CraftPlanner planner;
     private final Consumer<Component> statusSink;
+    private final Consumer<Feedback> feedbackSink;
     private State state = State.IDLE;
     private @Nullable RecipeView recipe;
     private boolean repeat;
@@ -32,29 +33,39 @@ public final class CraftExecutor {
     private int outputCountBeforeClick;
     private int batches;
 
-    public CraftExecutor(Minecraft minecraft, AbstractCraftingMenu menu, Consumer<Component> statusSink) {
+    public CraftExecutor(
+        Minecraft minecraft,
+        AbstractCraftingMenu menu,
+        Consumer<Component> statusSink,
+        Consumer<Feedback> feedbackSink
+    ) {
         this.minecraft = minecraft;
         this.menu = menu;
         this.statusSink = statusSink;
+        this.feedbackSink = feedbackSink;
         this.planner = new CraftPlanner();
     }
 
     public boolean start(RecipeView recipe, boolean repeat) {
         if (this.state != State.IDLE || this.minecraft.player == null || this.minecraft.gameMode == null) {
+            this.feedbackSink.accept(Feedback.CRAFT_FAILED);
             return false;
         }
         if (!recipe.craftable()) {
             this.statusSink.accept(Component.translatable("legacycrafting.status.missing"));
+            this.feedbackSink.accept(Feedback.CRAFT_FAILED);
             return false;
         }
         if (!this.menu.getCarried().isEmpty()) {
             this.statusSink.accept(Component.translatable("legacycrafting.status.cursor"));
+            this.feedbackSink.accept(Feedback.CRAFT_FAILED);
             return false;
         }
 
         var plan = this.planner.plan(recipe.recipe(), this.minecraft.player, this.menu, repeat);
         if (plan.isEmpty()) {
             this.statusSink.accept(Component.translatable("legacycrafting.status.unavailable"));
+            this.feedbackSink.accept(Feedback.CRAFT_FAILED);
             return false;
         }
 
@@ -134,6 +145,7 @@ public final class CraftExecutor {
         this.state = State.IDLE;
         this.recipe = null;
         this.statusSink.accept(message);
+        this.feedbackSink.accept(Feedback.CRAFT_FAILED);
     }
 
     private void sendPlacement() {
@@ -148,6 +160,12 @@ public final class CraftExecutor {
         this.state = State.IDLE;
         this.recipe = null;
         this.statusSink.accept(message);
+        this.feedbackSink.accept(Feedback.CRAFT_SUCCEEDED);
+    }
+
+    public enum Feedback {
+        CRAFT_SUCCEEDED,
+        CRAFT_FAILED
     }
 
     private boolean canStillCraft(LocalPlayer player, RecipeView recipe) {

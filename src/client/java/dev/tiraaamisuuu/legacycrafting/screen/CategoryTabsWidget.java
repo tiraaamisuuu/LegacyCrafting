@@ -1,6 +1,7 @@
 package dev.tiraaamisuuu.legacycrafting.screen;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.tiraaamisuuu.legacycrafting.client.LegacyUiSounds;
 import dev.tiraaamisuuu.legacycrafting.recipe.LegacyCategory;
 import java.util.function.Consumer;
 import net.minecraft.client.Minecraft;
@@ -94,6 +95,7 @@ public final class CategoryTabsWidget extends AbstractWidget {
         if (category != this.selected) {
             this.selected = category;
             this.onSelected.accept(category);
+            LegacyUiSounds.play(LegacyUiSounds.Cue.FOCUS);
         }
     }
 

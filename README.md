@@ -6,15 +6,18 @@ Browse known recipes, see ingredient availability, and craft without manually
 arranging the 2×2 or 3×3 grid.
 
 The interface is inspired by the usability of Minecraft Legacy Console
-Edition's crafting menu. This is an independent implementation and does not
-include code, textures, or other assets from Legacy4J or Minecraft Legacy
-Console Edition.
+Edition's crafting menu. It is an independent implementation and does not
+bundle Legacy4J or assets extracted from Minecraft Legacy Console Edition. The
+MIT-licensed navigation sound and controller prompts adapted from the Old UI
+for Legacy4J resource pack are credited in
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## Features
 
 - Eight recipe categories: Building, Decorations, Redstone / Mechanisms,
   Transportation, Tools, Combat, Food, and Miscellaneous
 - Legacy Console-style horizontal recipe strip with mouse and keyboard navigation
+- Original Legacy-style focus audio and Xbox 360 controller prompts
 - Large recipe icons, output quantities, ingredient previews, and tooltips
 - Clear visual distinction between craftable and unavailable recipes
 - All Recipes and Craftable filtering

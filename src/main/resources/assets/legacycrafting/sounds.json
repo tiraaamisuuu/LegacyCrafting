@@ -1,0 +1,52 @@
+{
+  "ui.focus": {
+    "sounds": [
+      {
+        "name": "legacycrafting:ui/focus",
+        "stream": false
+      }
+    ]
+  },
+  "ui.scroll": {
+    "sounds": [
+      {
+        "name": "legacycrafting:ui/focus",
+        "stream": false
+      }
+    ]
+  },
+  "ui.action": {
+    "sounds": [
+      {
+        "name": "minecraft:ui.button.click",
+        "type": "event"
+      }
+    ]
+  },
+  "ui.back": {
+    "sounds": [
+      {
+        "name": "minecraft:ui.button.click",
+        "type": "event",
+        "pitch": 0.75
+      }
+    ]
+  },
+  "ui.craft_fail": {
+    "sounds": [
+      {
+        "name": "minecraft:ui.button.click",
+        "type": "event",
+        "pitch": 0.5
+      }
+    ]
+  },
+  "ui.craft_success": {
+    "sounds": [
+      {
+        "name": "minecraft:entity.item.pickup",
+        "type": "event"
+      }
+    ]
+  }
+}

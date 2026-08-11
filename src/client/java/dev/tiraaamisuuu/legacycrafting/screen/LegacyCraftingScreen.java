@@ -1,6 +1,7 @@
 package dev.tiraaamisuuu.legacycrafting.screen;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.tiraaamisuuu.legacycrafting.client.LegacyUiSounds;
 import dev.tiraaamisuuu.legacycrafting.crafting.CraftExecutor;
 import dev.tiraaamisuuu.legacycrafting.recipe.BrowserRecipe;
 import dev.tiraaamisuuu.legacycrafting.recipe.LegacyCategory;
@@ -59,7 +60,14 @@ public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends 
             PANEL_HEIGHT - LOWER_PANEL_Y - 5,
             this.menu.getGridWidth()
         );
-        this.craftExecutor = new CraftExecutor(this.minecraft, this.menu, this.recipeDetails::setStatus);
+        this.craftExecutor = new CraftExecutor(
+            this.minecraft,
+            this.menu,
+            this.recipeDetails::setStatus,
+            feedback -> LegacyUiSounds.play(feedback == CraftExecutor.Feedback.CRAFT_SUCCEEDED
+                ? LegacyUiSounds.Cue.CRAFT_SUCCESS
+                : LegacyUiSounds.Cue.CRAFT_FAIL)
+        );
         this.categoryTabs = new CategoryTabsWidget(this.panelLeft() + 24, this.panelTop() - 27, category -> {
             this.selectedCategory = category;
             this.applyFilter();
@@ -119,6 +127,7 @@ public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends 
     }
 
     public void openVanillaScreen() {
+        LegacyUiSounds.play(LegacyUiSounds.Cue.BACK);
         if (this.menu instanceof CraftingMenu craftingMenu) {
             this.minecraft.gui.setScreen(new CraftingScreen(craftingMenu, this.minecraft.player.getInventory(), this.title));
         } else if (this.menu instanceof InventoryMenu) {
@@ -153,18 +162,18 @@ public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends 
             LegacyUiStyle.slot(graphics, this.leftPos + slot.x - 1, this.topPos + slot.y - 1, 18, false, false);
         }
 
-        this.drawControlHint(graphics, panelLeft, panelTop + PANEL_HEIGHT + 7, 0xFF4A9B55, "A", "legacycrafting.hint.craft");
-        this.drawControlHint(graphics, panelLeft + 68, panelTop + PANEL_HEIGHT + 7, 0xFFD1A83B, "Y", "legacycrafting.hint.maximum");
-        this.drawControlHint(graphics, panelLeft + 142, panelTop + PANEL_HEIGHT + 7, 0xFF4B77AE, "X", "legacycrafting.hint.filter");
-        this.drawControlHint(graphics, panelLeft + 251, panelTop + PANEL_HEIGHT + 7, 0xFF777777, "L", "legacycrafting.hint.vanilla");
-        this.drawControlHint(graphics, panelLeft + 342, panelTop + PANEL_HEIGHT + 7, 0xFFB64B4B, "B", "legacycrafting.hint.exit");
-    }
-
-    private void drawControlHint(GuiGraphicsExtractor graphics, int x, int y, int color, String key, String translationKey) {
-        int keyWidth = Math.max(9, this.font.width(key) + 4);
-        graphics.fill(x, y, x + keyWidth, y + 9, color);
-        graphics.centeredText(this.font, key, x + keyWidth / 2, y + 1, 0xFFFFFFFF);
-        graphics.text(this.font, Component.translatable(translationKey), x + keyWidth + 3, y + 1, 0xFFE0E0E0, true);
+        int hintX = panelLeft;
+        int hintY = panelTop + PANEL_HEIGHT + 7;
+        hintX += LegacyControlHint.draw(graphics, this.font, hintX, hintY, LegacyControlHint.Button.A,
+            Component.translatable("legacycrafting.hint.craft")) + 6;
+        hintX += LegacyControlHint.draw(graphics, this.font, hintX, hintY, LegacyControlHint.Button.Y,
+            Component.translatable("legacycrafting.hint.maximum")) + 6;
+        hintX += LegacyControlHint.draw(graphics, this.font, hintX, hintY, LegacyControlHint.Button.X,
+            Component.translatable("legacycrafting.hint.filter")) + 6;
+        hintX += LegacyControlHint.draw(graphics, this.font, hintX, hintY, LegacyControlHint.Button.LEFT_BUMPER,
+            Component.translatable("legacycrafting.hint.vanilla")) + 6;
+        LegacyControlHint.draw(graphics, this.font, hintX, hintY, LegacyControlHint.Button.B,
+            Component.translatable("legacycrafting.hint.exit"));
     }
 
     @Override
@@ -208,6 +217,12 @@ public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends 
             return true;
         }
         return super.keyPressed(event);
+    }
+
+    @Override
+    public void onClose() {
+        LegacyUiSounds.play(LegacyUiSounds.Cue.BACK);
+        super.onClose();
     }
 
     private boolean isPlayerInventorySlot(Slot slot) {

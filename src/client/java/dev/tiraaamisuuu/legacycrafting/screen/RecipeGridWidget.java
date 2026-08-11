@@ -1,6 +1,7 @@
 package dev.tiraaamisuuu.legacycrafting.screen;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.tiraaamisuuu.legacycrafting.client.LegacyUiSounds;
 import dev.tiraaamisuuu.legacycrafting.recipe.RecipeView;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -123,8 +124,12 @@ public final class RecipeGridWidget extends AbstractWidget {
         if (!this.isMouseOver(mouseX, mouseY) || scrollY == 0.0) {
             return false;
         }
+        int previousScroll = this.scrollIndex;
         this.scrollIndex -= (int)Math.signum(scrollY);
         this.clampScroll();
+        if (previousScroll != this.scrollIndex) {
+            LegacyUiSounds.play(LegacyUiSounds.Cue.SCROLL);
+        }
         return true;
     }
 
@@ -159,9 +164,13 @@ public final class RecipeGridWidget extends AbstractWidget {
     }
 
     private void select(int index) {
+        boolean changed = this.selectedIndex != index;
         this.selectedIndex = index;
         this.ensureSelectedVisible();
         this.onSelected.accept(this.recipes.get(index));
+        if (changed) {
+            LegacyUiSounds.play(LegacyUiSounds.Cue.FOCUS);
+        }
     }
 
     private void ensureSelectedVisible() {
