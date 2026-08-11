@@ -95,7 +95,7 @@ public final class RecipeDetailsWidget extends AbstractWidget {
                 ItemStack stack = alternatives.get(cycle);
                 graphics.item(stack, slotX + 3, slotY + 3);
                 if (missing) {
-                    graphics.text(minecraft.font, "!", slotX + 2, slotY + 1, 0xFFFFFF00, true);
+                    LegacyUiStyle.warning(graphics, slotX, slotY);
                 }
                 if (contains(mouseX, mouseY, slotX, slotY, INGREDIENT_SLOT_SIZE)) {
                     List<Component> tooltip = new ArrayList<>(net.minecraft.client.gui.screens.Screen.getTooltipFromItem(minecraft, stack));

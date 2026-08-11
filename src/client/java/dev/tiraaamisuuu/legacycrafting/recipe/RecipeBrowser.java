@@ -2,7 +2,6 @@ package dev.tiraaamisuuu.legacycrafting.recipe;
 
 import dev.tiraaamisuuu.legacycrafting.recipe.BrowserRecipe.IngredientSlot;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +32,6 @@ public final class RecipeBrowser {
             .filter(entry -> fitsGrid(entry.display(), menu.getGridWidth(), menu.getGridHeight()))
             .map(entry -> createBrowserRecipe(entry, context))
             .filter(recipe -> !recipe.output().isEmpty())
-            .sorted(Comparator.comparing(recipe -> recipe.output().getHoverName().getString(), String.CASE_INSENSITIVE_ORDER))
             .toList();
     }
 

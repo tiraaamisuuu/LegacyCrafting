@@ -12,6 +12,7 @@ import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.CommonComponents;
 
 public final class CategoryTabsWidget extends AbstractWidget {
@@ -19,6 +20,7 @@ public final class CategoryTabsWidget extends AbstractWidget {
     private static final int TAB_HEIGHT = 43;
     private final Consumer<LegacyCategory> onSelected;
     private final int visibleTabs;
+    private final float tabStep;
     private final List<LegacyCategory> categories;
     private LegacyCategory selected = LegacyCategory.BUILDING;
     private int firstVisible;
@@ -27,12 +29,14 @@ public final class CategoryTabsWidget extends AbstractWidget {
     public CategoryTabsWidget(
         int x,
         int y,
+        int totalWidth,
         int visibleTabs,
         List<LegacyCategory> categories,
         Consumer<LegacyCategory> onSelected
     ) {
-        super(x, y, visibleTabs * TAB_WIDTH, TAB_HEIGHT, CommonComponents.EMPTY);
+        super(x, y, totalWidth, TAB_HEIGHT, CommonComponents.EMPTY);
         this.visibleTabs = visibleTabs;
+        this.tabStep = visibleTabs <= 1 ? TAB_WIDTH : (totalWidth - TAB_WIDTH) / (float)(visibleTabs - 1);
         this.categories = List.copyOf(categories);
         this.onSelected = onSelected;
     }
@@ -50,7 +54,7 @@ public final class CategoryTabsWidget extends AbstractWidget {
                 break;
             }
             LegacyCategory category = this.categories.get(index);
-            int tabX = this.getX() + visibleIndex * TAB_WIDTH;
+            int tabX = this.getX() + Math.round(visibleIndex * this.tabStep);
             boolean selected = category == this.selected;
             int tabY = this.getY() + (selected ? 0 : 4);
             int tabHeight = TAB_HEIGHT - (selected ? 0 : 4);
@@ -59,22 +63,15 @@ public final class CategoryTabsWidget extends AbstractWidget {
             if (hovered) {
                 this.hoveredIndex = index;
             }
-            LegacyUiStyle.raisedPanel(
-                graphics,
+            graphics.blitSprite(
+                RenderPipelines.GUI_TEXTURED,
+                selected ? this.selectedSprite(visibleIndex) : LegacySprites.LOW_TAB,
                 tabX,
                 tabY,
-                TAB_WIDTH - 2,
-                tabHeight,
-                selected ? LegacyUiStyle.PANEL_LIGHT : hovered ? 0xFFC6C6C6 : LegacyUiStyle.PANEL_DARK
+                TAB_WIDTH,
+                tabHeight
             );
-            graphics.pose().pushMatrix();
-            graphics.pose().translate(tabX + 15, tabY + 10);
-            graphics.pose().scale(1.35F, 1.35F);
-            graphics.item(category.icon(), 0, 0, index);
-            graphics.pose().popMatrix();
-            if (selected) {
-                graphics.fill(tabX + 2, tabY + tabHeight - 4, tabX + TAB_WIDTH - 4, tabY + tabHeight + 2, LegacyUiStyle.PANEL_LIGHT);
-            }
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, category.icon(), tabX + 13, tabY + 8, 24, 24);
         }
         if (this.hoveredIndex >= 0) {
             graphics.setTooltipForNextFrame(
@@ -86,11 +83,27 @@ public final class CategoryTabsWidget extends AbstractWidget {
         }
     }
 
+    private net.minecraft.resources.Identifier selectedSprite(int visibleIndex) {
+        if (visibleIndex == 0) {
+            return LegacySprites.HIGH_TAB_LEFT;
+        }
+        if (visibleIndex == this.visibleTabs - 1) {
+            return LegacySprites.HIGH_TAB_RIGHT;
+        }
+        return LegacySprites.HIGH_TAB_MIDDLE;
+    }
+
     @Override
     public void onClick(MouseButtonEvent event, boolean doubleClick) {
-        int index = this.firstVisible + ((int)event.x() - this.getX()) / TAB_WIDTH;
-        if (index >= 0 && index < this.categories.size()) {
-            this.select(this.categories.get(index));
+        for (int visibleIndex = this.visibleTabs - 1; visibleIndex >= 0; visibleIndex--) {
+            int tabX = this.getX() + Math.round(visibleIndex * this.tabStep);
+            if (event.x() >= tabX && event.x() < tabX + TAB_WIDTH) {
+                int index = this.firstVisible + visibleIndex;
+                if (index < this.categories.size()) {
+                    this.select(this.categories.get(index));
+                }
+                return;
+            }
         }
     }
 

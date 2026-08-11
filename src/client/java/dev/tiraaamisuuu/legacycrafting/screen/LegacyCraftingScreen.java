@@ -30,11 +30,12 @@ public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends 
     private RecipeGridWidget recipeGrid;
     private RecipeDetailsWidget recipeDetails;
     private CategoryTabsWidget categoryTabs;
-    private RecipeFilterTabsWidget filterTabs;
+    private CraftingTypeTabsWidget typeTabs;
     private CraftExecutor craftExecutor;
     private List<BrowserRecipe> knownRecipes = List.of();
     private List<RecipeView> recipeViews = List.of();
     private boolean craftableOnly;
+    private CraftingType selectedType = CraftingType.CRAFTING;
     private LegacyCategory selectedCategory = LegacyCategory.BUILDING;
     private int lastInventoryVersion = -1;
     private int lastMenuStateId = -1;
@@ -71,6 +72,7 @@ public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends 
         this.categoryTabs = new CategoryTabsWidget(
             this.panelLeft() + this.layout.categoryTabsX(),
             this.panelTop() - 37,
+            this.layout.imageWidth(),
             this.layout.maxCategoryTabs(),
             LegacyCategory.forGrid(this.menu.getGridWidth()),
             category -> {
@@ -84,12 +86,12 @@ public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends 
             this.recipeDetails::setRecipe,
             this::activateRecipe
         );
-        this.filterTabs = new RecipeFilterTabsWidget(this.panelLeft() - 34, this.panelTop() + 2, craftableOnly -> {
-            this.craftableOnly = craftableOnly;
+        this.typeTabs = new CraftingTypeTabsWidget(this.panelLeft() - 36, this.panelTop() + 4, type -> {
+            this.selectedType = type;
             this.applyFilter();
         });
         this.addRenderableWidget(this.categoryTabs);
-        this.addRenderableWidget(this.filterTabs);
+        this.addRenderableWidget(this.typeTabs);
         this.addRenderableWidget(this.recipeGrid);
         this.addRenderableOnly(this.recipeDetails);
         this.reloadRecipes();
@@ -123,12 +125,11 @@ public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends 
     }
 
     private void applyFilter() {
-        this.recipeGrid.setRecipes(this.craftableOnly
-            ? this.recipeViews.stream()
-                .filter(view -> view.recipe().category() == this.selectedCategory)
-                .filter(RecipeView::craftable)
-                .toList()
-            : this.recipeViews.stream().filter(view -> view.recipe().category() == this.selectedCategory).toList());
+        this.recipeGrid.setRecipes(this.recipeViews.stream()
+            .filter(view -> view.recipe().category() == this.selectedCategory)
+            .filter(this.selectedType::accepts)
+            .filter(view -> !this.craftableOnly || view.craftable())
+            .toList());
     }
 
     public void openVanillaScreen() {
@@ -233,7 +234,9 @@ public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends 
             return true;
         }
         if (event.key() == InputConstants.KEY_X) {
-            this.filterTabs.toggle();
+            this.craftableOnly = !this.craftableOnly;
+            this.applyFilter();
+            LegacyUiSounds.play(LegacyUiSounds.Cue.ACTION);
             return true;
         }
         if (event.key() == InputConstants.KEY_B) {

@@ -61,6 +61,6 @@ record LegacyCraftingLayout(
     }
 
     int categoryTabsX() {
-        return -(this.maxCategoryTabs * CategoryTabsWidget.TAB_WIDTH - this.imageWidth) / 2;
+        return 0;
     }
 }

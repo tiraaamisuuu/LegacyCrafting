@@ -3,33 +3,31 @@ package dev.tiraaamisuuu.legacycrafting.recipe;
 import java.util.Arrays;
 import java.util.List;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.resources.Identifier;
 
 public enum LegacyCategory {
-    BUILDING("building", Items.OAK_PLANKS),
-    TOOLS("tools", Items.IRON_PICKAXE),
-    FOOD("food", Items.APPLE),
-    ARMOR("armor", Items.DIAMOND_CHESTPLATE),
-    REDSTONE("redstone", Items.LEVER),
-    TRANSPORTATION("transportation", Items.RAIL),
-    DECORATIONS("decorations", Items.PAINTING);
+    BUILDING("building", "structures"),
+    TOOLS("tools", "tools"),
+    FOOD("food", "food"),
+    ARMOR("armor", "armour"),
+    REDSTONE("redstone", "mechanisms"),
+    TRANSPORTATION("transportation", "transport"),
+    DECORATIONS("decorations", "decoration");
 
     private final String translationSuffix;
-    private final Item icon;
+    private final String iconPath;
 
-    LegacyCategory(String translationSuffix, Item icon) {
+    LegacyCategory(String translationSuffix, String iconPath) {
         this.translationSuffix = translationSuffix;
-        this.icon = icon;
+        this.iconPath = iconPath;
     }
 
     public Component title() {
         return Component.translatable("legacycrafting.category." + this.translationSuffix);
     }
 
-    public ItemStack icon() {
-        return new ItemStack(this.icon);
+    public Identifier icon() {
+        return Identifier.fromNamespaceAndPath("legacycrafting", "icon/" + this.iconPath);
     }
 
     public static List<LegacyCategory> forGrid(int gridWidth) {

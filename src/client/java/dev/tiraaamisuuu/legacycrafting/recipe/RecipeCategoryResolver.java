@@ -9,11 +9,15 @@ import net.minecraft.world.item.crafting.display.RecipeDisplayEntry;
 
 public final class RecipeCategoryResolver {
     public LegacyCategory resolve(RecipeDisplayEntry entry, ItemStack output) {
+        String path = BuiltInRegistries.ITEM.getKey(output.getItem()).getPath().toLowerCase(Locale.ROOT);
+        java.util.Optional<LegacyRecipeCatalog.Listing> legacyListing = LegacyRecipeCatalog.instance().find(path);
+        if (legacyListing.isPresent()) {
+            return legacyListing.get().category();
+        }
         if (entry.category() == RecipeBookCategories.CRAFTING_REDSTONE) {
             return LegacyCategory.REDSTONE;
         }
 
-        String path = BuiltInRegistries.ITEM.getKey(output.getItem()).getPath().toLowerCase(Locale.ROOT);
         if (output.has(DataComponents.FOOD) || output.has(DataComponents.CONSUMABLE)) {
             return LegacyCategory.FOOD;
         }

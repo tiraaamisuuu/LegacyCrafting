@@ -1,6 +1,7 @@
 package dev.tiraaamisuuu.legacycrafting.screen;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
 
 final class LegacyUiStyle {
     static final int PANEL = 0xFFD0D0D0;
@@ -19,42 +20,41 @@ final class LegacyUiStyle {
     }
 
     static void raisedPanel(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int color) {
-        graphics.fill(x + 3, y + 3, x + width + 3, y + height + 3, DEEP_SHADOW);
-        graphics.fill(x, y, x + width, y + height, color);
-        graphics.fill(x, y, x + width, y + 2, HIGHLIGHT);
-        graphics.fill(x, y, x + 2, y + height, HIGHLIGHT);
-        graphics.fill(x, y + height - 2, x + width, y + height, SHADOW);
-        graphics.fill(x + width - 2, y, x + width, y + height, SHADOW);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, LegacySprites.SMALL_PANEL, x, y, width, height);
     }
 
     static void insetPanel(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int color) {
-        graphics.fill(x, y, x + width, y + height, color);
-        graphics.fill(x, y, x + width, y + 1, SHADOW);
-        graphics.fill(x, y, x + 1, y + height, SHADOW);
-        graphics.fill(x, y + height - 1, x + width, y + height, HIGHLIGHT);
-        graphics.fill(x + width - 1, y, x + width, y + height, HIGHLIGHT);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, LegacySprites.SQUARE_RECESSED_PANEL, x, y, width, height);
     }
 
     static void slot(GuiGraphicsExtractor graphics, int x, int y, int size, boolean selected, boolean missing) {
-        int color = missing ? MISSING : SLOT;
-        graphics.fill(x, y, x + size, y + size, color);
-        graphics.fill(x, y, x + size, y + 1, SHADOW);
-        graphics.fill(x, y, x + 1, y + size, SHADOW);
-        graphics.fill(x, y + size - 1, x + size, y + size, HIGHLIGHT);
-        graphics.fill(x + size - 1, y, x + size, y + size, HIGHLIGHT);
+        graphics.blitSprite(
+            RenderPipelines.GUI_TEXTURED,
+            missing ? LegacySprites.RED_ICON_HOLDER : LegacySprites.ICON_HOLDER,
+            x,
+            y,
+            size,
+            size
+        );
         if (selected) {
-            graphics.outline(x - 1, y - 1, size + 2, size + 2, SELECTED);
-            graphics.outline(x - 2, y - 2, size + 4, size + 4, 0xFF263C2C);
+            int highlightSize = size == 27 ? 36 : size + 8;
+            int offset = (highlightSize - size) / 2;
+            graphics.blitSprite(
+                RenderPipelines.GUI_TEXTURED,
+                LegacySprites.SELECT_ICON_HIGHLIGHT,
+                x - offset,
+                y - offset,
+                highlightSize,
+                highlightSize
+            );
         }
     }
 
     static void arrow(GuiGraphicsExtractor graphics, int x, int y) {
-        int color = 0xFF858585;
-        graphics.fill(x, y + 5, x + 10, y + 9, color);
-        graphics.fill(x + 8, y + 2, x + 12, y + 12, color);
-        graphics.fill(x + 10, y + 4, x + 14, y + 10, color);
-        graphics.fill(x + 12, y + 6, x + 16, y + 8, color);
-        graphics.horizontalLine(x, x + 8, y + 5, HIGHLIGHT);
-        graphics.horizontalLine(x, x + 8, y + 8, SHADOW);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, LegacySprites.SMALL_ARROW, x, y, 16, 14);
+    }
+
+    static void warning(GuiGraphicsExtractor graphics, int x, int y) {
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, LegacySprites.ICON_WARNING, x, y, 8, 8);
     }
 }

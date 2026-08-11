@@ -5,19 +5,21 @@ and crafting-table crafting screens with a fast, category-driven recipe menu.
 Browse known recipes, see ingredient availability, and craft without manually
 arranging the 2×2 or 3×3 grid.
 
-The interface is inspired by the usability of Minecraft Legacy Console
-Edition's crafting menu. It is an independent implementation and does not
-bundle Legacy4J or assets extracted from Minecraft Legacy Console Edition. The
-MIT-licensed navigation sound and controller prompts adapted from the Old UI
-for Legacy4J resource pack are credited in
+The crafting and server-interaction code is an independent client-side
+implementation. To reproduce the established Legacy4J look accurately, the UI
+uses selected MIT-licensed Legacy4J sprites, menu sounds, and recipe ordering
+data. It also uses the navigation sound and controller prompts from the
+MIT-licensed Old UI for Legacy4J resource pack. It does not contain assets
+extracted from Minecraft Legacy Console Edition. All reused files are credited in
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## Features
 
 - Seven classic recipe categories: Structures, Tools & Weapons, Food, Armour,
   Mechanisms, Transportation, and Decorations
-- Legacy Console-style horizontal recipe strip with mouse and keyboard navigation
-- Original Legacy-style focus audio and Xbox 360 controller prompts
+- Legacy4J-style grouped recipe strip with vertically selectable recipe variants
+- Four classic crafting-mode tabs and seven category tabs
+- Legacy-style menu audio and Xbox 360 controller prompts
 - Large recipe icons, output quantities, ingredient previews, and tooltips
 - Clear visual distinction between craftable and unavailable recipes
 - All Recipes and Craftable filtering
@@ -53,8 +55,8 @@ required on the server.
 
 - Left click a recipe: craft once.
 - Shift + left click a recipe: craft as many as possible.
-- Mouse wheel: scroll recipes.
-- Arrow keys: navigate a focused recipe grid or category bar.
+- Mouse wheel: scroll recipes or cycle variants in the selected recipe family.
+- Left/Right: navigate recipe families; Up/Down: choose a family variant.
 - Enter or Space: craft the focused recipe.
 - `A`: craft the selected recipe once.
 - `Y`: craft the selected recipe as many times as possible.
@@ -95,14 +97,16 @@ receives a recipe update. Recipes are not re-evaluated every rendered frame.
 - Only shaped and shapeless crafting recipe displays are supported. Special
   recipes that do not provide client-side crafting requirements are shown as
   unavailable.
-- Categories beyond Minecraft's broad recipe-book categories use conservative
-  output-item heuristics and may need refinement for modded items.
+- Bundled vanilla recipe families follow Legacy4J's ordering data. Unknown
+  datapack and modded recipes fall back to the server-supplied recipe group and
+  conservative category heuristics.
+- The banner, firework, and dyeing side tabs filter ordinary recipes only. The
+  special editors from full Legacy4J require server-aware custom crafting and
+  are deliberately outside this client-only mod's scope.
 - Controller input is not implemented yet, although tabs and recipe selection
   are separate focusable widgets for future controller navigation.
-- The supplied old navigation pack contains only the focus cue. Craft success
-  uses Minecraft's item-pickup sound; back and failure cues currently use
-  pitched vanilla UI sounds until independently licensed replacements are
-  available.
+- Craft success intentionally uses Minecraft's normal item-pickup sound; focus,
+  scrolling, actions, back, and failure use the credited menu cues.
 - Shift crafting is capped at 64 placement batches as a safety guard.
 
 ## Building from source

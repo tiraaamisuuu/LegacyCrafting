@@ -10,7 +10,7 @@
   "ui.scroll": {
     "sounds": [
       {
-        "name": "legacycrafting:ui/focus",
+        "name": "legacycrafting:ui/scroll",
         "stream": false
       }
     ]
@@ -18,26 +18,24 @@
   "ui.action": {
     "sounds": [
       {
-        "name": "minecraft:ui.button.click",
-        "type": "event"
+        "name": "legacycrafting:ui/action",
+        "stream": false
       }
     ]
   },
   "ui.back": {
     "sounds": [
       {
-        "name": "minecraft:ui.button.click",
-        "type": "event",
-        "pitch": 0.75
+        "name": "legacycrafting:ui/back",
+        "stream": false
       }
     ]
   },
   "ui.craft_fail": {
     "sounds": [
       {
-        "name": "minecraft:ui.button.click",
-        "type": "event",
-        "pitch": 0.5
+        "name": "legacycrafting:ui/craft_fail",
+        "stream": false
       }
     ]
   },
