@@ -3,6 +3,7 @@ package dev.tiraaamisuuu.legacycrafting.screen;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.tiraaamisuuu.legacycrafting.client.LegacyUiSounds;
 import dev.tiraaamisuuu.legacycrafting.recipe.LegacyCategory;
+import java.util.List;
 import java.util.function.Consumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -14,14 +15,25 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.CommonComponents;
 
 public final class CategoryTabsWidget extends AbstractWidget {
-    private static final int TAB_WIDTH = 43;
-    private static final int TAB_HEIGHT = 29;
+    static final int TAB_WIDTH = 51;
+    private static final int TAB_HEIGHT = 43;
     private final Consumer<LegacyCategory> onSelected;
+    private final int visibleTabs;
+    private final List<LegacyCategory> categories;
     private LegacyCategory selected = LegacyCategory.BUILDING;
+    private int firstVisible;
     private int hoveredIndex = -1;
 
-    public CategoryTabsWidget(int x, int y, Consumer<LegacyCategory> onSelected) {
-        super(x, y, LegacyCategory.values().length * TAB_WIDTH, TAB_HEIGHT, CommonComponents.EMPTY);
+    public CategoryTabsWidget(
+        int x,
+        int y,
+        int visibleTabs,
+        List<LegacyCategory> categories,
+        Consumer<LegacyCategory> onSelected
+    ) {
+        super(x, y, visibleTabs * TAB_WIDTH, TAB_HEIGHT, CommonComponents.EMPTY);
+        this.visibleTabs = visibleTabs;
+        this.categories = List.copyOf(categories);
         this.onSelected = onSelected;
     }
 
@@ -32,35 +44,42 @@ public final class CategoryTabsWidget extends AbstractWidget {
     @Override
     protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         this.hoveredIndex = -1;
-        LegacyCategory[] categories = LegacyCategory.values();
-        for (int index = 0; index < categories.length; index++) {
-            int tabX = this.getX() + index * TAB_WIDTH;
-            boolean hovered = mouseX >= tabX && mouseX < tabX + TAB_WIDTH && mouseY >= this.getY() && mouseY < this.getBottom();
+        for (int visibleIndex = 0; visibleIndex < this.visibleTabs; visibleIndex++) {
+            int index = this.firstVisible + visibleIndex;
+            if (index >= this.categories.size()) {
+                break;
+            }
+            LegacyCategory category = this.categories.get(index);
+            int tabX = this.getX() + visibleIndex * TAB_WIDTH;
+            boolean selected = category == this.selected;
+            int tabY = this.getY() + (selected ? 0 : 4);
+            int tabHeight = TAB_HEIGHT - (selected ? 0 : 4);
+            boolean hovered = mouseX >= tabX && mouseX < tabX + TAB_WIDTH
+                && mouseY >= tabY && mouseY < tabY + tabHeight;
             if (hovered) {
                 this.hoveredIndex = index;
             }
-            boolean selected = categories[index] == this.selected;
             LegacyUiStyle.raisedPanel(
                 graphics,
                 tabX,
-                this.getY(),
+                tabY,
                 TAB_WIDTH - 2,
-                TAB_HEIGHT,
+                tabHeight,
                 selected ? LegacyUiStyle.PANEL_LIGHT : hovered ? 0xFFC6C6C6 : LegacyUiStyle.PANEL_DARK
             );
             graphics.pose().pushMatrix();
-            graphics.pose().translate(tabX + 10, this.getY() + 5);
-            graphics.pose().scale(1.25F, 1.25F);
-            graphics.item(categories[index].icon(), 0, 0, index);
+            graphics.pose().translate(tabX + 15, tabY + 10);
+            graphics.pose().scale(1.35F, 1.35F);
+            graphics.item(category.icon(), 0, 0, index);
             graphics.pose().popMatrix();
             if (selected) {
-                graphics.fill(tabX + 2, this.getBottom() - 3, tabX + TAB_WIDTH - 4, this.getBottom(), LegacyUiStyle.PANEL_LIGHT);
+                graphics.fill(tabX + 2, tabY + tabHeight - 4, tabX + TAB_WIDTH - 4, tabY + tabHeight + 2, LegacyUiStyle.PANEL_LIGHT);
             }
         }
         if (this.hoveredIndex >= 0) {
             graphics.setTooltipForNextFrame(
                 Minecraft.getInstance().font,
-                categories[this.hoveredIndex].title(),
+                this.categories.get(this.hoveredIndex).title(),
                 mouseX,
                 mouseY
             );
@@ -69,10 +88,21 @@ public final class CategoryTabsWidget extends AbstractWidget {
 
     @Override
     public void onClick(MouseButtonEvent event, boolean doubleClick) {
-        int index = ((int)event.x() - this.getX()) / TAB_WIDTH;
-        if (index >= 0 && index < LegacyCategory.values().length) {
-            this.select(LegacyCategory.values()[index]);
+        int index = this.firstVisible + ((int)event.x() - this.getX()) / TAB_WIDTH;
+        if (index >= 0 && index < this.categories.size()) {
+            this.select(this.categories.get(index));
         }
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (!this.isMouseOver(mouseX, mouseY) || scrollY == 0.0) {
+            return false;
+        }
+        int selectedIndex = this.categories.indexOf(this.selected);
+        int index = Math.floorMod(selectedIndex - (int)Math.signum(scrollY), this.categories.size());
+        this.select(this.categories.get(index));
+        return true;
     }
 
     @Override
@@ -85,18 +115,32 @@ public final class CategoryTabsWidget extends AbstractWidget {
         if (delta == 0) {
             return false;
         }
-        LegacyCategory[] categories = LegacyCategory.values();
-        int index = Math.floorMod(this.selected.ordinal() + delta, categories.length);
-        this.select(categories[index]);
+        int selectedIndex = this.categories.indexOf(this.selected);
+        int index = Math.floorMod(selectedIndex + delta, this.categories.size());
+        this.select(this.categories.get(index));
         return true;
     }
 
     private void select(LegacyCategory category) {
         if (category != this.selected) {
             this.selected = category;
+            this.ensureSelectedVisible();
             this.onSelected.accept(category);
             LegacyUiSounds.play(LegacyUiSounds.Cue.FOCUS);
         }
+    }
+
+    private void ensureSelectedVisible() {
+        int selectedIndex = this.categories.indexOf(this.selected);
+        if (selectedIndex < this.firstVisible) {
+            this.firstVisible = selectedIndex;
+        } else if (selectedIndex >= this.firstVisible + this.visibleTabs) {
+            this.firstVisible = selectedIndex - this.visibleTabs + 1;
+        }
+        this.firstVisible = Math.max(
+            0,
+            Math.min(this.firstVisible, Math.max(0, this.categories.size() - this.visibleTabs))
+        );
     }
 
     @Override

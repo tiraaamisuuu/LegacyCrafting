@@ -47,4 +47,14 @@ final class LegacyUiStyle {
             graphics.outline(x - 2, y - 2, size + 4, size + 4, 0xFF263C2C);
         }
     }
+
+    static void arrow(GuiGraphicsExtractor graphics, int x, int y) {
+        int color = 0xFF858585;
+        graphics.fill(x, y + 5, x + 10, y + 9, color);
+        graphics.fill(x + 8, y + 2, x + 12, y + 12, color);
+        graphics.fill(x + 10, y + 4, x + 14, y + 10, color);
+        graphics.fill(x + 12, y + 6, x + 16, y + 8, color);
+        graphics.horizontalLine(x, x + 8, y + 5, HIGHLIGHT);
+        graphics.horizontalLine(x, x + 8, y + 8, SHADOW);
+    }
 }

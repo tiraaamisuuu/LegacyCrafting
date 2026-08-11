@@ -1,19 +1,20 @@
 package dev.tiraaamisuuu.legacycrafting.recipe;
 
+import java.util.Arrays;
+import java.util.List;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 public enum LegacyCategory {
-    BUILDING("building", Items.BRICKS),
-    DECORATIONS("decorations", Items.FLOWER_POT),
-    REDSTONE("redstone", Items.REDSTONE),
-    TRANSPORTATION("transportation", Items.MINECART),
+    BUILDING("building", Items.OAK_PLANKS),
     TOOLS("tools", Items.IRON_PICKAXE),
-    COMBAT("combat", Items.IRON_SWORD),
     FOOD("food", Items.APPLE),
-    MISCELLANEOUS("miscellaneous", Items.CHEST);
+    ARMOR("armor", Items.DIAMOND_CHESTPLATE),
+    REDSTONE("redstone", Items.LEVER),
+    TRANSPORTATION("transportation", Items.RAIL),
+    DECORATIONS("decorations", Items.PAINTING);
 
     private final String translationSuffix;
     private final Item icon;
@@ -30,5 +31,10 @@ public enum LegacyCategory {
     public ItemStack icon() {
         return new ItemStack(this.icon);
     }
-}
 
+    public static List<LegacyCategory> forGrid(int gridWidth) {
+        return gridWidth == 2
+            ? Arrays.stream(values()).filter(category -> category != ARMOR).toList()
+            : List.of(values());
+    }
+}

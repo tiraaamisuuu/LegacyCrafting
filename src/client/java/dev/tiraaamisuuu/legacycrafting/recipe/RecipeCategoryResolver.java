@@ -20,14 +20,18 @@ public final class RecipeCategoryResolver {
         if (containsAny(path, "boat", "minecart", "rail", "saddle", "elytra")) {
             return LegacyCategory.TRANSPORTATION;
         }
+        if (containsAny(path, "helmet", "chestplate", "leggings", "boots")) {
+            return LegacyCategory.ARMOR;
+        }
         if (output.has(DataComponents.WEAPON)
             || output.has(DataComponents.PIERCING_WEAPON)
             || output.has(DataComponents.KINETIC_WEAPON)
-            || containsAny(path, "sword", "bow", "arrow", "shield", "helmet", "chestplate", "leggings", "boots", "mace", "trident")) {
-            return LegacyCategory.COMBAT;
-        }
-        if (output.has(DataComponents.TOOL)
-            || containsAny(path, "pickaxe", "axe", "shovel", "hoe", "shears", "fishing_rod", "flint_and_steel", "brush", "clock", "compass")) {
+            || output.has(DataComponents.TOOL)
+            || containsAny(
+                path,
+                "sword", "bow", "arrow", "shield", "mace", "trident", "pickaxe", "axe", "shovel", "hoe", "shears",
+                "fishing_rod", "flint_and_steel", "brush", "clock", "compass"
+            )) {
             return LegacyCategory.TOOLS;
         }
         if (containsAny(
@@ -42,7 +46,7 @@ public final class RecipeCategoryResolver {
         if (entry.category() == RecipeBookCategories.CRAFTING_EQUIPMENT) {
             return LegacyCategory.TOOLS;
         }
-        return LegacyCategory.MISCELLANEOUS;
+        return LegacyCategory.DECORATIONS;
     }
 
     private static boolean containsAny(String value, String... terms) {
@@ -54,4 +58,3 @@ public final class RecipeCategoryResolver {
         return false;
     }
 }
-

@@ -16,8 +16,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 public final class RecipeFilterTabsWidget extends AbstractWidget {
-    private static final int TAB_WIDTH = 37;
-    private static final int TAB_HEIGHT = 38;
+    private static final int TAB_WIDTH = 34;
+    private static final int TAB_HEIGHT = 41;
     private final Consumer<Boolean> onChanged;
     private boolean craftableOnly;
     private int hoveredIndex = -1;
@@ -48,13 +48,13 @@ public final class RecipeFilterTabsWidget extends AbstractWidget {
                 this.getX(),
                 tabY,
                 TAB_WIDTH,
-                TAB_HEIGHT - 2,
+                TAB_HEIGHT - 1,
                 selected ? LegacyUiStyle.PANEL_LIGHT : hovered ? 0xFFC6C6C6 : LegacyUiStyle.PANEL_DARK
             );
             ItemStack icon = new ItemStack(index == 0 ? Items.CRAFTING_TABLE : Items.EMERALD);
             graphics.pose().pushMatrix();
-            graphics.pose().translate(this.getX() + 8, tabY + 7);
-            graphics.pose().scale(1.35F, 1.35F);
+            graphics.pose().translate(this.getX() + 7, tabY + 9);
+            graphics.pose().scale(1.25F, 1.25F);
             graphics.item(icon, 0, 0, index);
             graphics.pose().popMatrix();
             if (selected) {

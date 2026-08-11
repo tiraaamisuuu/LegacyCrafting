@@ -18,7 +18,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
 public final class RecipeGridWidget extends AbstractWidget {
-    private static final int CELL_SIZE = 29;
+    private static final int CELL_SIZE = 27;
     private static final int UNCRAFTABLE_OVERLAY = 0x77707070;
 
     private final int visibleColumns;
@@ -86,11 +86,11 @@ public final class RecipeGridWidget extends AbstractWidget {
             RecipeView recipe = this.recipes.get(recipeIndex);
             ItemStack output = recipe.recipe().output();
             graphics.pose().pushMatrix();
-            graphics.pose().translate(cellX + 5, cellY + 5);
-            graphics.pose().scale(1.25F, 1.25F);
+            graphics.pose().translate(cellX + 4, cellY + 4);
+            graphics.pose().scale(1.2F, 1.2F);
             graphics.item(output, 0, 0, recipeIndex);
             graphics.pose().popMatrix();
-            graphics.itemDecorations(net.minecraft.client.Minecraft.getInstance().font, output, cellX + 6, cellY + 6);
+            graphics.itemDecorations(net.minecraft.client.Minecraft.getInstance().font, output, cellX + 5, cellY + 5);
             if (!recipe.craftable()) {
                 graphics.fill(cellX + 2, cellY + 2, cellX + CELL_SIZE - 2, cellY + CELL_SIZE - 2, UNCRAFTABLE_OVERLAY);
             }

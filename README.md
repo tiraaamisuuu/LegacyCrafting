@@ -14,8 +14,8 @@ for Legacy4J resource pack are credited in
 
 ## Features
 
-- Eight recipe categories: Building, Decorations, Redstone / Mechanisms,
-  Transportation, Tools, Combat, Food, and Miscellaneous
+- Seven classic recipe categories: Structures, Tools & Weapons, Food, Armour,
+  Mechanisms, Transportation, and Decorations
 - Legacy Console-style horizontal recipe strip with mouse and keyboard navigation
 - Original Legacy-style focus audio and Xbox 360 controller prompts
 - Large recipe icons, output quantities, ingredient previews, and tooltips
@@ -99,7 +99,10 @@ receives a recipe update. Recipes are not re-evaluated every rendered frame.
   output-item heuristics and may need refinement for modded items.
 - Controller input is not implemented yet, although tabs and recipe selection
   are separate focusable widgets for future controller navigation.
-- The custom interface currently uses a fixed desktop-oriented panel size.
+- The supplied old navigation pack contains only the focus cue. Craft success
+  uses Minecraft's item-pickup sound; back and failure cues currently use
+  pitched vanilla UI sounds until independently licensed replacements are
+  available.
 - Shift crafting is capped at 64 placement batches as a safety guard.
 
 ## Building from source

@@ -20,12 +20,14 @@ import org.jspecify.annotations.Nullable;
 public final class RecipeDetailsWidget extends AbstractWidget {
     private static final int INGREDIENT_SLOT_SIZE = 23;
     private final int craftingGridSize;
+    private final LegacyCraftingLayout layout;
     private @Nullable RecipeView recipeView;
     private Component status = Component.translatable("legacycrafting.status.ready");
 
-    public RecipeDetailsWidget(int x, int y, int width, int height, int craftingGridSize) {
-        super(x, y, width, height, CommonComponents.EMPTY);
+    public RecipeDetailsWidget(int x, int y, int craftingGridSize, LegacyCraftingLayout layout) {
+        super(x, y, layout.craftingPanelWidth(), LegacyCraftingLayout.BOTTOM_PANEL_HEIGHT, CommonComponents.EMPTY);
         this.craftingGridSize = craftingGridSize;
+        this.layout = layout;
         this.active = false;
     }
 
@@ -51,7 +53,7 @@ public final class RecipeDetailsWidget extends AbstractWidget {
                 minecraft.font,
                 Component.translatable("legacycrafting.recipe.none"),
                 this.getX() + this.getWidth() / 2,
-                this.getY() + 12,
+                this.getY() + this.layout.bottomPanelTitleY(),
                 LegacyUiStyle.MUTED_TEXT
             );
             return;
@@ -62,13 +64,12 @@ public final class RecipeDetailsWidget extends AbstractWidget {
             minecraft.font,
             recipe.output().getHoverName(),
             this.getX() + this.getWidth() / 2,
-            this.getY() + 9,
+            this.getY() + this.layout.bottomPanelTitleY(),
             LegacyUiStyle.TEXT
         );
 
-        int gridWidth = this.craftingGridSize * INGREDIENT_SLOT_SIZE;
-        int gridX = this.getX() + 10 + (72 - gridWidth) / 2;
-        int gridY = this.getY() + 28;
+        int gridX = this.getX() + this.layout.craftingGridX();
+        int gridY = this.getY() + this.layout.craftingGridY();
         for (int y = 0; y < this.craftingGridSize; y++) {
             for (int x = 0; x < this.craftingGridSize; x++) {
                 LegacyUiStyle.slot(
@@ -109,13 +110,13 @@ public final class RecipeDetailsWidget extends AbstractWidget {
             }
         }
 
-        int arrowX = this.getX() + 91;
-        int arrowY = gridY + gridWidth / 2 - 3;
-        graphics.text(minecraft.font, "→", arrowX, arrowY, 0xFF8A8A8A, false);
+        int arrowX = this.getX() + this.layout.craftingArrowX();
+        int arrowY = this.getY() + 57;
+        LegacyUiStyle.arrow(graphics, arrowX, arrowY);
 
         int outputSize = 36;
-        int outputX = this.getX() + 136;
-        int outputY = gridY + Math.max(0, (gridWidth - outputSize) / 2);
+        int outputX = this.getX() + this.layout.craftingResultX();
+        int outputY = this.getY() + 48;
         LegacyUiStyle.slot(graphics, outputX, outputY, outputSize, false, !this.recipeView.craftable());
         graphics.pose().pushMatrix();
         graphics.pose().translate(outputX + 4, outputY + 4);
@@ -127,21 +128,6 @@ public final class RecipeDetailsWidget extends AbstractWidget {
             graphics.setTooltipForNextFrame(minecraft.font, recipe.output(), mouseX, mouseY);
         }
 
-        graphics.centeredText(
-            minecraft.font,
-            Component.translatable("legacycrafting.output_count", recipe.output().getCount()),
-            outputX + outputSize / 2,
-            outputY + outputSize + 4,
-            LegacyUiStyle.MUTED_TEXT
-        );
-        int statusColor = this.recipeView.craftable() ? 0xFF315B37 : 0xFF8A2020;
-        graphics.centeredText(
-            minecraft.font,
-            this.status,
-            this.getX() + this.getWidth() / 2,
-            this.getBottom() - 14,
-            statusColor
-        );
     }
 
     private boolean isMissing(IngredientSlot ingredientSlot) {
