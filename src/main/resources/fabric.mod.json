@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "legacycrafting",
+  "version": "${version}",
+  "name": "LegacyCrafting",
+  "description": "A server-compatible, Legacy Console-inspired recipe crafting interface.",
+  "authors": [
+    "tiraaamisuuu"
+  ],
+  "contact": {
+    "sources": "https://github.com/tiraaamisuuu/LegacyCrafting",
+    "issues": "https://github.com/tiraaamisuuu/LegacyCrafting/issues"
+  },
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "dev.tiraaamisuuu.legacycrafting.client.LegacyCraftingClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.19.3",
+    "minecraft": "~26.2",
+    "java": ">=25",
+    "fabric-api": ">=0.157.0"
+  }
+}
+
