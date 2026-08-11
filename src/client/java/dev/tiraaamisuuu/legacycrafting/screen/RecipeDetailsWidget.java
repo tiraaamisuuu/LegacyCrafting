@@ -93,7 +93,11 @@ public final class RecipeDetailsWidget extends AbstractWidget {
             if (!alternatives.isEmpty()) {
                 int cycle = (int)((System.currentTimeMillis() / 1000L) % alternatives.size());
                 ItemStack stack = alternatives.get(cycle);
-                graphics.item(stack, slotX + 3, slotY + 3);
+                graphics.pose().pushMatrix();
+                graphics.pose().translate(slotX, slotY);
+                graphics.pose().scale(INGREDIENT_SLOT_SIZE / 18.0F, INGREDIENT_SLOT_SIZE / 18.0F);
+                graphics.item(stack, 0, 0);
+                graphics.pose().popMatrix();
                 if (missing) {
                     LegacyUiStyle.warning(graphics, slotX, slotY);
                 }
@@ -119,11 +123,11 @@ public final class RecipeDetailsWidget extends AbstractWidget {
         int outputY = this.getY() + 48;
         LegacyUiStyle.slot(graphics, outputX, outputY, outputSize, false, !this.recipeView.craftable());
         graphics.pose().pushMatrix();
-        graphics.pose().translate(outputX + 4, outputY + 4);
-        graphics.pose().scale(1.75F, 1.75F);
+        graphics.pose().translate(outputX, outputY);
+        graphics.pose().scale(outputSize / 18.0F, outputSize / 18.0F);
         graphics.item(recipe.output(), 0, 0);
+        graphics.itemDecorations(minecraft.font, recipe.output(), 0, 0);
         graphics.pose().popMatrix();
-        graphics.itemDecorations(minecraft.font, recipe.output(), outputX + 10, outputY + 10);
         if (contains(mouseX, mouseY, outputX, outputY, outputSize)) {
             graphics.setTooltipForNextFrame(minecraft.font, recipe.output(), mouseX, mouseY);
         }

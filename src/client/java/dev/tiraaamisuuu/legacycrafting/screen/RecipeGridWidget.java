@@ -16,7 +16,6 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.MouseButtonInfo;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
@@ -103,14 +102,7 @@ public final class RecipeGridWidget extends AbstractWidget {
             boolean selected = groupIndex == this.selectedGroupIndex;
             int variantIndex = selected ? this.selectedVariantIndex : 0;
             if (selected && group.variants().size() > 1) {
-                graphics.blitSprite(
-                    RenderPipelines.GUI_TEXTURED,
-                    group.variants().size() == 2 ? LegacySprites.CRAFTING_TWO_SLOT_SELECTION : LegacySprites.CRAFTING_SELECTION,
-                    cellX - 4,
-                    rowY + (group.variants().size() == 2 ? -12 : -39),
-                    36,
-                    group.variants().size() == 2 ? 78 : 105
-                );
+                LegacyUiStyle.recipeSelection(graphics, cellX, rowY, group.variants().size());
                 if (group.variants().size() > 2) {
                     this.renderRecipe(graphics, group.variants().get(previousVariant(group, variantIndex)), cellX, rowY - CELL_SIZE, groupIndex);
                 }
@@ -134,10 +126,10 @@ public final class RecipeGridWidget extends AbstractWidget {
         }
 
         if (this.scrollIndex > 0) {
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, LegacySprites.SCROLL_LEFT, this.getX() - 8, rowY + 7, 6, 11);
+            graphics.blitSprite(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, LegacySprites.SCROLL_LEFT, this.getX() - 8, rowY + 7, 6, 11);
         }
         if (this.scrollIndex < Math.max(0, this.groups.size() - this.visibleColumns)) {
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, LegacySprites.SCROLL_RIGHT, this.getX() + this.getWidth() + 2, rowY + 7, 6, 11);
+            graphics.blitSprite(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, LegacySprites.SCROLL_RIGHT, this.getX() + this.getWidth() + 2, rowY + 7, 6, 11);
         }
 
         RecipeView hovered = this.hoveredRecipe();
@@ -149,8 +141,8 @@ public final class RecipeGridWidget extends AbstractWidget {
     private void renderRecipe(GuiGraphicsExtractor graphics, RecipeView recipe, int x, int y, int seed) {
         ItemStack output = recipe.recipe().output();
         graphics.pose().pushMatrix();
-        graphics.pose().translate(x + 4, y + 4);
-        graphics.pose().scale(1.2F, 1.2F);
+        graphics.pose().translate(x, y);
+        graphics.pose().scale(CELL_SIZE / 18.0F, CELL_SIZE / 18.0F);
         graphics.item(output, 0, 0, seed);
         graphics.pose().popMatrix();
         if (!recipe.craftable()) {

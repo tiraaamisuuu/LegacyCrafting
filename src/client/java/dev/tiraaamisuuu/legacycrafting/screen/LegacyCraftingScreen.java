@@ -90,8 +90,8 @@ public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends 
             this.selectedType = type;
             this.applyFilter();
         });
-        this.addRenderableWidget(this.categoryTabs);
-        this.addRenderableWidget(this.typeTabs);
+        this.addWidget(this.categoryTabs);
+        this.addWidget(this.typeTabs);
         this.addRenderableWidget(this.recipeGrid);
         this.addRenderableOnly(this.recipeDetails);
         this.reloadRecipes();
@@ -156,6 +156,8 @@ public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends 
         super.extractBackground(graphics, mouseX, mouseY, partialTick);
         int panelLeft = this.panelLeft();
         int panelTop = this.panelTop();
+        this.categoryTabs.extractRenderState(graphics, mouseX, mouseY, partialTick);
+        this.typeTabs.extractRenderState(graphics, mouseX, mouseY, partialTick);
         LegacyUiStyle.raisedPanel(
             graphics,
             panelLeft,
@@ -219,7 +221,7 @@ public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends 
     protected boolean hasClickedOutside(double mouseX, double mouseY, int screenX, int screenY) {
         int panelLeft = this.panelLeft();
         int panelTop = this.panelTop();
-        return mouseX < panelLeft - 34 || mouseY < panelTop - 37
+        return mouseX < panelLeft - 36 || mouseY < panelTop - 37
             || mouseX >= panelLeft + this.layout.imageWidth() || mouseY >= panelTop + this.layout.imageHeight();
     }
 

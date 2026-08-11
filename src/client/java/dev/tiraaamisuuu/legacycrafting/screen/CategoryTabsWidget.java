@@ -57,7 +57,7 @@ public final class CategoryTabsWidget extends AbstractWidget {
             int tabX = this.getX() + Math.round(visibleIndex * this.tabStep);
             boolean selected = category == this.selected;
             int tabY = this.getY() + (selected ? 0 : 4);
-            int tabHeight = TAB_HEIGHT - (selected ? 0 : 4);
+            int tabHeight = TAB_HEIGHT;
             boolean hovered = mouseX >= tabX && mouseX < tabX + TAB_WIDTH
                 && mouseY >= tabY && mouseY < tabY + tabHeight;
             if (hovered) {
@@ -71,7 +71,7 @@ public final class CategoryTabsWidget extends AbstractWidget {
                 TAB_WIDTH,
                 tabHeight
             );
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, category.icon(), tabX + 13, tabY + 8, 24, 24);
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, category.icon(), tabX + 14, tabY + 10, 24, 24);
         }
         if (this.hoveredIndex >= 0) {
             graphics.setTooltipForNextFrame(

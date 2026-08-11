@@ -28,6 +28,9 @@ final class LegacyUiStyle {
     }
 
     static void slot(GuiGraphicsExtractor graphics, int x, int y, int size, boolean selected, boolean missing) {
+        float cornerOffset = size < 18 ? -1.0F : -size / 20.0F;
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(cornerOffset, cornerOffset);
         graphics.blitSprite(
             RenderPipelines.GUI_TEXTURED,
             missing ? LegacySprites.RED_ICON_HOLDER : LegacySprites.ICON_HOLDER,
@@ -36,22 +39,41 @@ final class LegacyUiStyle {
             size,
             size
         );
+        graphics.pose().popMatrix();
         if (selected) {
-            int highlightSize = size == 27 ? 36 : size + 8;
-            int offset = (highlightSize - size) / 2;
+            int highlightSize = 36;
+            float offset = cornerOffset + (size - highlightSize) / 2.0F;
+            graphics.pose().pushMatrix();
+            graphics.pose().translate(offset, offset);
             graphics.blitSprite(
                 RenderPipelines.GUI_TEXTURED,
                 LegacySprites.SELECT_ICON_HIGHLIGHT,
-                x - offset,
-                y - offset,
+                x,
+                y,
                 highlightSize,
                 highlightSize
             );
+            graphics.pose().popMatrix();
         }
     }
 
+    static void recipeSelection(GuiGraphicsExtractor graphics, int x, int y, int variantCount) {
+        boolean twoSlots = variantCount == 2;
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(-27.0F / 20.0F - 4.5F, -27.0F / 20.0F + (twoSlots ? -12.0F : -39.0F));
+        graphics.blitSprite(
+            RenderPipelines.GUI_TEXTURED,
+            twoSlots ? LegacySprites.CRAFTING_TWO_SLOT_SELECTION : LegacySprites.CRAFTING_SELECTION,
+            x,
+            y,
+            36,
+            twoSlots ? 78 : 105
+        );
+        graphics.pose().popMatrix();
+    }
+
     static void arrow(GuiGraphicsExtractor graphics, int x, int y) {
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, LegacySprites.SMALL_ARROW, x, y, 16, 14);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, LegacySprites.SMALL_ARROW, x, y, 16, 13);
     }
 
     static void warning(GuiGraphicsExtractor graphics, int x, int y) {
