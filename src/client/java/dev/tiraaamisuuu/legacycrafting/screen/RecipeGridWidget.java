@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import dev.tiraaamisuuu.legacycrafting.recipe.BrowserRecipe;
 import dev.tiraaamisuuu.legacycrafting.recipe.RecipeView;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -28,16 +29,25 @@ public final class RecipeGridWidget extends AbstractWidget {
     private final int columns;
     private final int visibleRows;
     private final Consumer<RecipeView> onSelected;
+    private final BiConsumer<RecipeView, Boolean> onActivated;
     private List<RecipeView> recipes = List.of();
     private int selectedIndex = -1;
     private int scrollRow;
     private int hoveredIndex = -1;
 
-    public RecipeGridWidget(int x, int y, int columns, int visibleRows, Consumer<RecipeView> onSelected) {
+    public RecipeGridWidget(
+        int x,
+        int y,
+        int columns,
+        int visibleRows,
+        Consumer<RecipeView> onSelected,
+        BiConsumer<RecipeView, Boolean> onActivated
+    ) {
         super(x, y, columns * CELL_SIZE, visibleRows * CELL_SIZE, CommonComponents.EMPTY);
         this.columns = columns;
         this.visibleRows = visibleRows;
         this.onSelected = onSelected;
+        this.onActivated = onActivated;
     }
 
     public void setRecipes(List<RecipeView> recipes) {
@@ -113,6 +123,7 @@ public final class RecipeGridWidget extends AbstractWidget {
         int index = this.indexAt(event.x(), event.y());
         if (index >= 0) {
             this.select(index);
+            this.onActivated.accept(this.recipes.get(index), event.hasShiftDown());
         }
     }
 
@@ -139,6 +150,10 @@ public final class RecipeGridWidget extends AbstractWidget {
         };
         if (delta != 0 && !this.recipes.isEmpty()) {
             this.select(Math.max(0, Math.min(this.recipes.size() - 1, this.selectedIndex + delta)));
+            return true;
+        }
+        if (event.isSelection() && this.selectedRecipe() != null) {
+            this.onActivated.accept(this.selectedRecipe(), event.hasShiftDown());
             return true;
         }
         return super.keyPressed(event);

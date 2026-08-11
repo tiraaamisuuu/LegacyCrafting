@@ -1,5 +1,6 @@
 package dev.tiraaamisuuu.legacycrafting.screen;
 
+import dev.tiraaamisuuu.legacycrafting.crafting.CraftExecutor;
 import dev.tiraaamisuuu.legacycrafting.recipe.RecipeBrowser;
 import dev.tiraaamisuuu.legacycrafting.recipe.BrowserRecipe;
 import dev.tiraaamisuuu.legacycrafting.recipe.RecipeCraftabilityService;
@@ -16,11 +17,12 @@ import net.minecraft.world.item.crafting.display.RecipeDisplay;
 
 public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends AbstractContainerScreen<T> implements RecipeUpdateListener {
     private static final int PANEL_WIDTH = 392;
-    private static final int PANEL_HEIGHT = 226;
+    private static final int PANEL_HEIGHT = 264;
     private final RecipeBrowser recipeBrowser = new RecipeBrowser();
     private final RecipeCraftabilityService craftabilityService = new RecipeCraftabilityService();
     private RecipeGridWidget recipeGrid;
     private RecipeDetailsWidget recipeDetails;
+    private CraftExecutor craftExecutor;
     private Button filterButton;
     private List<BrowserRecipe> knownRecipes = List.of();
     private List<RecipeView> recipeViews = List.of();
@@ -37,8 +39,16 @@ public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends 
     @Override
     protected void init() {
         super.init();
-        this.recipeDetails = new RecipeDetailsWidget(this.leftPos + 184, this.topPos + 154, 200, 64);
-        this.recipeGrid = new RecipeGridWidget(this.leftPos + 184, this.topPos + 30, 5, 4, this.recipeDetails::setRecipe);
+        this.recipeDetails = new RecipeDetailsWidget(this.leftPos + 184, this.topPos + 154, 200, 102);
+        this.craftExecutor = new CraftExecutor(this.minecraft, this.menu, this.recipeDetails::setStatus);
+        this.recipeGrid = new RecipeGridWidget(
+            this.leftPos + 184,
+            this.topPos + 30,
+            5,
+            4,
+            this.recipeDetails::setRecipe,
+            this::activateRecipe
+        );
         this.addRenderableWidget(this.recipeGrid);
         this.addRenderableOnly(this.recipeDetails);
         this.filterButton = this.addRenderableWidget(Button.builder(this.filterLabel(), button -> {
@@ -52,11 +62,16 @@ public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends 
 
     @Override
     protected void containerTick() {
+        this.craftExecutor.tick();
         int inventoryVersion = this.minecraft.player.getInventory().getTimesChanged();
         int menuStateId = this.menu.getStateId();
         if (inventoryVersion != this.lastInventoryVersion || menuStateId != this.lastMenuStateId) {
             this.refreshCraftability();
         }
+    }
+
+    private void activateRecipe(RecipeView recipe, boolean maximum) {
+        this.craftExecutor.start(recipe, maximum);
     }
 
     private void reloadRecipes() {

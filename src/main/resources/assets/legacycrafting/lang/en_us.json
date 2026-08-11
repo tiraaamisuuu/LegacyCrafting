@@ -7,4 +7,16 @@
   "legacycrafting.recipe.none": "No recipe selected",
   "legacycrafting.recipe.selected": "Selected recipe: %s",
   "legacycrafting.recipe.navigation": "Use the arrow keys to browse recipes"
+  ,"legacycrafting.status.ready": "Click to craft • Shift-click for maximum"
+  ,"legacycrafting.status.missing": "Missing ingredients"
+  ,"legacycrafting.status.cursor": "Clear the carried item first"
+  ,"legacycrafting.status.unavailable": "This recipe cannot be planned"
+  ,"legacycrafting.status.placing": "Server is placing ingredients…"
+  ,"legacycrafting.status.crafting": "Crafting…"
+  ,"legacycrafting.status.complete": "Crafted"
+  ,"legacycrafting.status.complete_many": "Crafted as many as possible"
+  ,"legacycrafting.status.inventory_full": "Inventory is full"
+  ,"legacycrafting.status.cancelled": "Craft cancelled"
+  ,"legacycrafting.status.timeout": "Server did not respond"
+  ,"legacycrafting.status.rejected": "Server rejected the craft"
 }

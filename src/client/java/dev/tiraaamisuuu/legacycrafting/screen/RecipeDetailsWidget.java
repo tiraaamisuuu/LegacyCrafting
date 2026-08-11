@@ -19,6 +19,7 @@ import org.jspecify.annotations.Nullable;
 public final class RecipeDetailsWidget extends AbstractWidget {
     private static final int SLOT_SIZE = 20;
     private @Nullable RecipeView recipeView;
+    private Component status = Component.translatable("legacycrafting.status.ready");
 
     public RecipeDetailsWidget(int x, int y, int width, int height) {
         super(x, y, width, height, CommonComponents.EMPTY);
@@ -27,6 +28,10 @@ public final class RecipeDetailsWidget extends AbstractWidget {
 
     public void setRecipe(@Nullable RecipeView recipeView) {
         this.recipeView = recipeView;
+    }
+
+    public void setStatus(Component status) {
+        this.status = status;
     }
 
     @Override
@@ -71,6 +76,7 @@ public final class RecipeDetailsWidget extends AbstractWidget {
                 }
             }
         }
+        graphics.text(minecraft.font, this.status, this.getX() + 8, this.getBottom() - 12, 0xFFE7B85A, false);
     }
 
     @Override
