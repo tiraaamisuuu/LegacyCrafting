@@ -19,6 +19,8 @@ import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.minecraft.world.item.crafting.display.SlotDisplayContext;
 
 public final class RecipeBrowser {
+    private final RecipeCategoryResolver categoryResolver = new RecipeCategoryResolver();
+
     public List<BrowserRecipe> loadKnownRecipes(LocalPlayer player, AbstractCraftingMenu menu) {
         ContextMap context = SlotDisplayContext.fromLevel(player.level());
         Map<Integer, RecipeDisplayEntry> knownEntries = new LinkedHashMap<>();
@@ -43,7 +45,7 @@ public final class RecipeBrowser {
         };
     }
 
-    private static BrowserRecipe createBrowserRecipe(RecipeDisplayEntry entry, ContextMap context) {
+    private BrowserRecipe createBrowserRecipe(RecipeDisplayEntry entry, ContextMap context) {
         ItemStack output = entry.resultItems(context).stream().findFirst().orElse(ItemStack.EMPTY).copy();
         List<Ingredient> requirements = entry.craftingRequirements().orElse(List.of());
         List<IngredientSlot> ingredientSlots = new ArrayList<>();
@@ -59,7 +61,9 @@ public final class RecipeBrowser {
                     Ingredient ingredient = requirementIndex < requirements.size() ? requirements.get(requirementIndex++) : null;
                     ingredientSlots.add(new IngredientSlot(index % shaped.width(), index / shaped.width(), display, ingredient));
                 }
-                return new BrowserRecipe(entry, output, shaped.width(), shaped.height(), List.copyOf(ingredientSlots));
+                return new BrowserRecipe(
+                    entry, output, this.categoryResolver.resolve(entry, output), shaped.width(), shaped.height(), List.copyOf(ingredientSlots)
+                );
             }
             case ShapelessCraftingRecipeDisplay shapeless -> {
                 for (int index = 0; index < shapeless.ingredients().size(); index++) {
@@ -68,10 +72,9 @@ public final class RecipeBrowser {
                 }
                 int width = Math.min(3, Math.max(1, shapeless.ingredients().size()));
                 int height = Math.max(1, (shapeless.ingredients().size() + width - 1) / width);
-                return new BrowserRecipe(entry, output, width, height, List.copyOf(ingredientSlots));
+                return new BrowserRecipe(entry, output, this.categoryResolver.resolve(entry, output), width, height, List.copyOf(ingredientSlots));
             }
             default -> throw new IllegalArgumentException("Unsupported crafting display: " + entry.display().getClass().getName());
         }
     }
 }
-

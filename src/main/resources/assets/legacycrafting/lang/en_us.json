@@ -6,17 +6,26 @@
   "legacycrafting.filter.craftable": "Craftable",
   "legacycrafting.recipe.none": "No recipe selected",
   "legacycrafting.recipe.selected": "Selected recipe: %s",
-  "legacycrafting.recipe.navigation": "Use the arrow keys to browse recipes"
-  ,"legacycrafting.status.ready": "Click to craft • Shift-click for maximum"
-  ,"legacycrafting.status.missing": "Missing ingredients"
-  ,"legacycrafting.status.cursor": "Clear the carried item first"
-  ,"legacycrafting.status.unavailable": "This recipe cannot be planned"
-  ,"legacycrafting.status.placing": "Server is placing ingredients…"
-  ,"legacycrafting.status.crafting": "Crafting…"
-  ,"legacycrafting.status.complete": "Crafted"
-  ,"legacycrafting.status.complete_many": "Crafted as many as possible"
-  ,"legacycrafting.status.inventory_full": "Inventory is full"
-  ,"legacycrafting.status.cancelled": "Craft cancelled"
-  ,"legacycrafting.status.timeout": "Server did not respond"
-  ,"legacycrafting.status.rejected": "Server rejected the craft"
+  "legacycrafting.recipe.navigation": "Use the arrow keys to browse recipes",
+  "legacycrafting.category.building": "Building",
+  "legacycrafting.category.decorations": "Decorations",
+  "legacycrafting.category.redstone": "Redstone / Mechanisms",
+  "legacycrafting.category.transportation": "Transportation",
+  "legacycrafting.category.tools": "Tools",
+  "legacycrafting.category.combat": "Combat",
+  "legacycrafting.category.food": "Food",
+  "legacycrafting.category.miscellaneous": "Miscellaneous",
+  "legacycrafting.category.navigation": "Use left and right to change category",
+  "legacycrafting.status.ready": "Click to craft • Shift-click for maximum",
+  "legacycrafting.status.missing": "Missing ingredients",
+  "legacycrafting.status.cursor": "Clear the carried item first",
+  "legacycrafting.status.unavailable": "This recipe cannot be planned",
+  "legacycrafting.status.placing": "Server is placing ingredients…",
+  "legacycrafting.status.crafting": "Crafting…",
+  "legacycrafting.status.complete": "Crafted",
+  "legacycrafting.status.complete_many": "Crafted as many as possible",
+  "legacycrafting.status.inventory_full": "Inventory is full",
+  "legacycrafting.status.cancelled": "Craft cancelled",
+  "legacycrafting.status.timeout": "Server did not respond",
+  "legacycrafting.status.rejected": "Server rejected the craft"
 }

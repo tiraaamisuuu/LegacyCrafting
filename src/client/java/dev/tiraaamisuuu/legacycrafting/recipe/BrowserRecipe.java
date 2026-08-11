@@ -10,6 +10,7 @@ import org.jspecify.annotations.Nullable;
 public record BrowserRecipe(
     RecipeDisplayEntry entry,
     ItemStack output,
+    LegacyCategory category,
     int recipeWidth,
     int recipeHeight,
     List<IngredientSlot> ingredientSlots
@@ -17,4 +18,3 @@ public record BrowserRecipe(
     public record IngredientSlot(int x, int y, SlotDisplay display, @Nullable Ingredient ingredient) {
     }
 }
-

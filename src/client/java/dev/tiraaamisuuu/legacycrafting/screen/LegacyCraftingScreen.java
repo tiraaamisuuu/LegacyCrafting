@@ -3,6 +3,7 @@ package dev.tiraaamisuuu.legacycrafting.screen;
 import dev.tiraaamisuuu.legacycrafting.crafting.CraftExecutor;
 import dev.tiraaamisuuu.legacycrafting.recipe.RecipeBrowser;
 import dev.tiraaamisuuu.legacycrafting.recipe.BrowserRecipe;
+import dev.tiraaamisuuu.legacycrafting.recipe.LegacyCategory;
 import dev.tiraaamisuuu.legacycrafting.recipe.RecipeCraftabilityService;
 import dev.tiraaamisuuu.legacycrafting.recipe.RecipeView;
 import java.util.List;
@@ -22,11 +23,13 @@ public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends 
     private final RecipeCraftabilityService craftabilityService = new RecipeCraftabilityService();
     private RecipeGridWidget recipeGrid;
     private RecipeDetailsWidget recipeDetails;
+    private CategoryTabsWidget categoryTabs;
     private CraftExecutor craftExecutor;
     private Button filterButton;
     private List<BrowserRecipe> knownRecipes = List.of();
     private List<RecipeView> recipeViews = List.of();
     private boolean craftableOnly;
+    private LegacyCategory selectedCategory = LegacyCategory.BUILDING;
     private int lastInventoryVersion = -1;
     private int lastMenuStateId = -1;
 
@@ -39,23 +42,28 @@ public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends 
     @Override
     protected void init() {
         super.init();
-        this.recipeDetails = new RecipeDetailsWidget(this.leftPos + 184, this.topPos + 154, 200, 102);
+        this.recipeDetails = new RecipeDetailsWidget(this.leftPos + 184, this.topPos + 158, 200, 98);
         this.craftExecutor = new CraftExecutor(this.minecraft, this.menu, this.recipeDetails::setStatus);
+        this.categoryTabs = new CategoryTabsWidget(this.leftPos + 184, this.topPos + 5, category -> {
+            this.selectedCategory = category;
+            this.applyFilter();
+        });
         this.recipeGrid = new RecipeGridWidget(
             this.leftPos + 184,
-            this.topPos + 30,
+            this.topPos + 34,
             5,
             4,
             this.recipeDetails::setRecipe,
             this::activateRecipe
         );
+        this.addRenderableWidget(this.categoryTabs);
         this.addRenderableWidget(this.recipeGrid);
         this.addRenderableOnly(this.recipeDetails);
         this.filterButton = this.addRenderableWidget(Button.builder(this.filterLabel(), button -> {
             this.craftableOnly = !this.craftableOnly;
             button.setMessage(this.filterLabel());
             this.applyFilter();
-        }).bounds(this.leftPos + 300, this.topPos + 5, 84, 20).build());
+        }).bounds(this.leftPos + 84, this.topPos + 5, 84, 20).build());
         this.reloadRecipes();
         this.setInitialFocus(this.recipeGrid);
     }
@@ -88,8 +96,11 @@ public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends 
 
     private void applyFilter() {
         this.recipeGrid.setRecipes(this.craftableOnly
-            ? this.recipeViews.stream().filter(RecipeView::craftable).toList()
-            : this.recipeViews);
+            ? this.recipeViews.stream()
+                .filter(view -> view.recipe().category() == this.selectedCategory)
+                .filter(RecipeView::craftable)
+                .toList()
+            : this.recipeViews.stream().filter(view -> view.recipe().category() == this.selectedCategory).toList());
     }
 
     private Component filterLabel() {
@@ -117,7 +128,6 @@ public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends 
     @Override
     protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         graphics.text(this.font, this.title, 8, 8, 0xFFFFFFFF, false);
-        graphics.text(this.font, Component.translatable("legacycrafting.recipes"), 184, 9, 0xFFE7B85A, false);
         graphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, 0xFFBBC3D1, false);
     }
 }
