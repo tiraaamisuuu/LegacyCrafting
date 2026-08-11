@@ -3,6 +3,7 @@ package dev.tiraaamisuuu.legacycrafting.screen;
 import dev.tiraaamisuuu.legacycrafting.recipe.BrowserRecipe;
 import dev.tiraaamisuuu.legacycrafting.recipe.BrowserRecipe.IngredientSlot;
 import dev.tiraaamisuuu.legacycrafting.recipe.RecipeView;
+import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -17,17 +18,24 @@ import net.minecraft.world.item.crafting.display.SlotDisplayContext;
 import org.jspecify.annotations.Nullable;
 
 public final class RecipeDetailsWidget extends AbstractWidget {
-    private static final int SLOT_SIZE = 20;
+    private static final int INGREDIENT_SLOT_SIZE = 23;
+    private final int craftingGridSize;
     private @Nullable RecipeView recipeView;
     private Component status = Component.translatable("legacycrafting.status.ready");
 
-    public RecipeDetailsWidget(int x, int y, int width, int height) {
+    public RecipeDetailsWidget(int x, int y, int width, int height, int craftingGridSize) {
         super(x, y, width, height, CommonComponents.EMPTY);
+        this.craftingGridSize = craftingGridSize;
         this.active = false;
     }
 
     public void setRecipe(@Nullable RecipeView recipeView) {
         this.recipeView = recipeView;
+        if (recipeView != null) {
+            this.status = Component.translatable(
+                recipeView.craftable() ? "legacycrafting.status.ready" : "legacycrafting.status.missing"
+            );
+        }
     }
 
     public void setStatus(Component status) {
@@ -37,39 +45,59 @@ public final class RecipeDetailsWidget extends AbstractWidget {
     @Override
     protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         Minecraft minecraft = Minecraft.getInstance();
-        graphics.fill(this.getX(), this.getY(), this.getRight(), this.getBottom(), 0xFF1B202A);
-        graphics.outline(this.getX(), this.getY(), this.getWidth(), this.getHeight(), 0xFF596276);
+        LegacyUiStyle.insetPanel(graphics, this.getX(), this.getY(), this.getWidth(), this.getHeight(), LegacyUiStyle.PANEL_DARK);
         if (this.recipeView == null) {
-            graphics.centeredText(minecraft.font, Component.translatable("legacycrafting.recipe.none"), this.getX() + this.getWidth() / 2, this.getY() + 28, 0xFF9BA4B5);
+            graphics.centeredText(
+                minecraft.font,
+                Component.translatable("legacycrafting.recipe.none"),
+                this.getX() + this.getWidth() / 2,
+                this.getY() + 12,
+                LegacyUiStyle.MUTED_TEXT
+            );
             return;
         }
 
         BrowserRecipe recipe = this.recipeView.recipe();
-        int outputX = this.getX() + 8;
-        int outputY = this.getY() + 8;
-        graphics.pose().pushMatrix();
-        graphics.pose().translate(outputX, outputY);
-        graphics.pose().scale(2.0F, 2.0F);
-        graphics.item(recipe.output(), 0, 0);
-        graphics.itemDecorations(minecraft.font, recipe.output(), 0, 0);
-        graphics.pose().popMatrix();
-        graphics.text(minecraft.font, recipe.output().getHoverName(), outputX + 38, outputY, this.recipeView.craftable() ? 0xFFFFFFFF : 0xFF8E96A5, false);
-        graphics.text(minecraft.font, Component.translatable("legacycrafting.output_count", recipe.output().getCount()), outputX + 38, outputY + 11, 0xFFBBC3D1, false);
+        graphics.centeredText(
+            minecraft.font,
+            recipe.output().getHoverName(),
+            this.getX() + this.getWidth() / 2,
+            this.getY() + 9,
+            LegacyUiStyle.TEXT
+        );
+
+        int gridWidth = this.craftingGridSize * INGREDIENT_SLOT_SIZE;
+        int gridX = this.getX() + 10 + (72 - gridWidth) / 2;
+        int gridY = this.getY() + 28;
+        for (int y = 0; y < this.craftingGridSize; y++) {
+            for (int x = 0; x < this.craftingGridSize; x++) {
+                LegacyUiStyle.slot(
+                    graphics,
+                    gridX + x * INGREDIENT_SLOT_SIZE,
+                    gridY + y * INGREDIENT_SLOT_SIZE,
+                    INGREDIENT_SLOT_SIZE,
+                    false,
+                    false
+                );
+            }
+        }
 
         ContextMap context = SlotDisplayContext.fromLevel(minecraft.level);
-        int gridX = this.getX() + 8;
-        int gridY = this.getY() + 34;
         for (IngredientSlot ingredientSlot : recipe.ingredientSlots()) {
-            int slotX = gridX + ingredientSlot.x() * SLOT_SIZE;
-            int slotY = gridY + ingredientSlot.y() * SLOT_SIZE;
-            graphics.fill(slotX, slotY, slotX + 18, slotY + 18, 0xFF303744);
+            int slotX = gridX + ingredientSlot.x() * INGREDIENT_SLOT_SIZE;
+            int slotY = gridY + ingredientSlot.y() * INGREDIENT_SLOT_SIZE;
+            boolean missing = this.isMissing(ingredientSlot);
+            LegacyUiStyle.slot(graphics, slotX, slotY, INGREDIENT_SLOT_SIZE, false, missing);
             List<ItemStack> alternatives = ingredientSlot.display().resolveForStacks(context);
             if (!alternatives.isEmpty()) {
                 int cycle = (int)((System.currentTimeMillis() / 1000L) % alternatives.size());
                 ItemStack stack = alternatives.get(cycle);
-                graphics.item(stack, slotX + 1, slotY + 1);
-                if (mouseX >= slotX && mouseX < slotX + 18 && mouseY >= slotY && mouseY < slotY + 18) {
-                    List<Component> tooltip = new java.util.ArrayList<>(net.minecraft.client.gui.screens.Screen.getTooltipFromItem(minecraft, stack));
+                graphics.item(stack, slotX + 3, slotY + 3);
+                if (missing) {
+                    graphics.text(minecraft.font, "!", slotX + 2, slotY + 1, 0xFFFFFF00, true);
+                }
+                if (contains(mouseX, mouseY, slotX, slotY, INGREDIENT_SLOT_SIZE)) {
+                    List<Component> tooltip = new ArrayList<>(net.minecraft.client.gui.screens.Screen.getTooltipFromItem(minecraft, stack));
                     this.recipeView.ingredientSummaries().stream()
                         .filter(summary -> ingredientSlot.ingredient() != null && summary.ingredient().equals(ingredientSlot.ingredient()))
                         .findFirst()
@@ -80,7 +108,53 @@ public final class RecipeDetailsWidget extends AbstractWidget {
                 }
             }
         }
-        graphics.textWithWordWrap(minecraft.font, this.status, this.getX() + 75, this.getY() + 43, this.getWidth() - 83, 0xFFE7B85A, false);
+
+        int arrowX = this.getX() + 91;
+        int arrowY = gridY + gridWidth / 2 - 3;
+        graphics.text(minecraft.font, "→", arrowX, arrowY, 0xFF8A8A8A, false);
+
+        int outputSize = 36;
+        int outputX = this.getX() + 136;
+        int outputY = gridY + Math.max(0, (gridWidth - outputSize) / 2);
+        LegacyUiStyle.slot(graphics, outputX, outputY, outputSize, false, !this.recipeView.craftable());
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(outputX + 4, outputY + 4);
+        graphics.pose().scale(1.75F, 1.75F);
+        graphics.item(recipe.output(), 0, 0);
+        graphics.pose().popMatrix();
+        graphics.itemDecorations(minecraft.font, recipe.output(), outputX + 10, outputY + 10);
+        if (contains(mouseX, mouseY, outputX, outputY, outputSize)) {
+            graphics.setTooltipForNextFrame(minecraft.font, recipe.output(), mouseX, mouseY);
+        }
+
+        graphics.centeredText(
+            minecraft.font,
+            Component.translatable("legacycrafting.output_count", recipe.output().getCount()),
+            outputX + outputSize / 2,
+            outputY + outputSize + 4,
+            LegacyUiStyle.MUTED_TEXT
+        );
+        int statusColor = this.recipeView.craftable() ? 0xFF315B37 : 0xFF8A2020;
+        graphics.centeredText(
+            minecraft.font,
+            this.status,
+            this.getX() + this.getWidth() / 2,
+            this.getBottom() - 14,
+            statusColor
+        );
+    }
+
+    private boolean isMissing(IngredientSlot ingredientSlot) {
+        if (ingredientSlot.ingredient() == null || this.recipeView == null) {
+            return false;
+        }
+        return this.recipeView.ingredientSummaries().stream()
+            .filter(summary -> summary.ingredient().equals(ingredientSlot.ingredient()))
+            .anyMatch(summary -> summary.available() < summary.required());
+    }
+
+    private static boolean contains(int mouseX, int mouseY, int x, int y, int size) {
+        return mouseX >= x && mouseX < x + size && mouseY >= y && mouseY < y + size;
     }
 
     @Override

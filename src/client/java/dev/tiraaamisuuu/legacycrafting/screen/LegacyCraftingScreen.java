@@ -1,14 +1,13 @@
 package dev.tiraaamisuuu.legacycrafting.screen;
 
 import dev.tiraaamisuuu.legacycrafting.crafting.CraftExecutor;
-import dev.tiraaamisuuu.legacycrafting.recipe.RecipeBrowser;
 import dev.tiraaamisuuu.legacycrafting.recipe.BrowserRecipe;
 import dev.tiraaamisuuu.legacycrafting.recipe.LegacyCategory;
+import dev.tiraaamisuuu.legacycrafting.recipe.RecipeBrowser;
 import dev.tiraaamisuuu.legacycrafting.recipe.RecipeCraftabilityService;
 import dev.tiraaamisuuu.legacycrafting.recipe.RecipeView;
 import java.util.List;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CraftingScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
@@ -23,14 +22,16 @@ import net.minecraft.world.item.crafting.display.RecipeDisplay;
 
 public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends AbstractContainerScreen<T> implements RecipeUpdateListener {
     private static final int PANEL_WIDTH = 392;
-    private static final int PANEL_HEIGHT = 264;
+    private static final int PANEL_HEIGHT = 226;
+    private static final int MENU_ORIGIN_X = 200;
+    private static final int MENU_ORIGIN_Y = 49;
+    private static final int LOWER_PANEL_Y = 94;
     private final RecipeBrowser recipeBrowser = new RecipeBrowser();
     private final RecipeCraftabilityService craftabilityService = new RecipeCraftabilityService();
     private RecipeGridWidget recipeGrid;
     private RecipeDetailsWidget recipeDetails;
     private CategoryTabsWidget categoryTabs;
     private CraftExecutor craftExecutor;
-    private Button filterButton;
     private List<BrowserRecipe> knownRecipes = List.of();
     private List<RecipeView> recipeViews = List.of();
     private boolean craftableOnly;
@@ -40,35 +41,41 @@ public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends 
 
     public LegacyCraftingScreen(T menu, Inventory inventory, Component title) {
         super(menu, inventory, title, PANEL_WIDTH, PANEL_HEIGHT);
-        this.inventoryLabelX = 8;
-        this.inventoryLabelY = 72;
     }
 
     @Override
     protected void init() {
         super.init();
-        this.recipeDetails = new RecipeDetailsWidget(this.leftPos + 184, this.topPos + 158, 200, 98);
+        this.leftPos = this.panelLeft() + MENU_ORIGIN_X;
+        this.topPos = this.panelTop() + MENU_ORIGIN_Y;
+
+        this.recipeDetails = new RecipeDetailsWidget(
+            this.panelLeft() + 4,
+            this.panelTop() + LOWER_PANEL_Y + 2,
+            196,
+            PANEL_HEIGHT - LOWER_PANEL_Y - 5,
+            this.menu.getGridWidth()
+        );
         this.craftExecutor = new CraftExecutor(this.minecraft, this.menu, this.recipeDetails::setStatus);
-        this.categoryTabs = new CategoryTabsWidget(this.leftPos + 184, this.topPos + 5, category -> {
+        this.categoryTabs = new CategoryTabsWidget(this.panelLeft() + 24, this.panelTop() - 27, category -> {
             this.selectedCategory = category;
             this.applyFilter();
         });
         this.recipeGrid = new RecipeGridWidget(
-            this.leftPos + 184,
-            this.topPos + 34,
-            5,
-            4,
+            this.panelLeft() + 44,
+            this.panelTop() + 35,
+            11,
             this.recipeDetails::setRecipe,
             this::activateRecipe
         );
+        RecipeFilterTabsWidget filterTabs = new RecipeFilterTabsWidget(this.panelLeft() - 34, this.panelTop() + 7, craftableOnly -> {
+            this.craftableOnly = craftableOnly;
+            this.applyFilter();
+        });
         this.addRenderableWidget(this.categoryTabs);
+        this.addRenderableWidget(filterTabs);
         this.addRenderableWidget(this.recipeGrid);
         this.addRenderableOnly(this.recipeDetails);
-        this.filterButton = this.addRenderableWidget(Button.builder(this.filterLabel(), button -> {
-            this.craftableOnly = !this.craftableOnly;
-            button.setMessage(this.filterLabel());
-            this.applyFilter();
-        }).bounds(this.leftPos + 8, this.topPos + 172, 160, 20).build());
         this.reloadRecipes();
         this.setInitialFocus(this.recipeGrid);
     }
@@ -108,10 +115,6 @@ public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends 
             : this.recipeViews.stream().filter(view -> view.recipe().category() == this.selectedCategory).toList());
     }
 
-    private Component filterLabel() {
-        return Component.translatable(this.craftableOnly ? "legacycrafting.filter.craftable" : "legacycrafting.filter.all");
-    }
-
     public void openVanillaScreen() {
         if (this.menu instanceof CraftingMenu craftingMenu) {
             this.minecraft.gui.setScreen(new CraftingScreen(craftingMenu, this.minecraft.player.getInventory(), this.title));
@@ -133,23 +136,83 @@ public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends 
     @Override
     public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         super.extractBackground(graphics, mouseX, mouseY, partialTick);
-        graphics.fill(this.leftPos, this.topPos, this.leftPos + this.imageWidth, this.topPos + this.imageHeight, 0xE6101319);
-        graphics.outline(this.leftPos, this.topPos, this.imageWidth, this.imageHeight, 0xFFE7B85A);
-        graphics.fill(this.leftPos + 176, this.topPos + 1, this.leftPos + 177, this.topPos + this.imageHeight - 1, 0xFF596276);
+        int panelLeft = this.panelLeft();
+        int panelTop = this.panelTop();
+        LegacyUiStyle.raisedPanel(graphics, panelLeft, panelTop, PANEL_WIDTH, PANEL_HEIGHT, LegacyUiStyle.PANEL);
+
+        graphics.fill(panelLeft + 2, panelTop + LOWER_PANEL_Y, panelLeft + PANEL_WIDTH - 2, panelTop + LOWER_PANEL_Y + 2, LegacyUiStyle.SHADOW);
+        graphics.fill(panelLeft + 201, panelTop + LOWER_PANEL_Y + 2, panelLeft + 203, panelTop + PANEL_HEIGHT - 2, LegacyUiStyle.SHADOW);
+
         for (Slot slot : this.menu.slots) {
-            if (slot.x >= 176) {
+            if (!this.isPlayerInventorySlot(slot)) {
                 continue;
             }
-            int x = this.leftPos + slot.x - 1;
-            int y = this.topPos + slot.y - 1;
-            graphics.fill(x, y, x + 18, y + 18, 0xFF252A35);
-            graphics.outline(x, y, 18, 18, slot == this.menu.getResultSlot() ? 0xFFE7B85A : 0xFF596276);
+            LegacyUiStyle.slot(graphics, this.leftPos + slot.x - 1, this.topPos + slot.y - 1, 18, false, false);
+        }
+
+        this.drawControlHint(graphics, panelLeft, panelTop + PANEL_HEIGHT + 7, 0xFF4A9B55, "↵", "legacycrafting.hint.craft");
+        this.drawControlHint(graphics, panelLeft + 68, panelTop + PANEL_HEIGHT + 7, 0xFFD1A83B, "⇧", "legacycrafting.hint.maximum");
+        this.drawControlHint(graphics, panelLeft + 142, panelTop + PANEL_HEIGHT + 7, 0xFF4B77AE, "◆", "legacycrafting.hint.filter");
+        this.drawControlHint(graphics, panelLeft + 251, panelTop + PANEL_HEIGHT + 7, 0xFF777777, "L", "legacycrafting.hint.vanilla");
+        this.drawControlHint(graphics, panelLeft + 342, panelTop + PANEL_HEIGHT + 7, 0xFFB64B4B, "Esc", "legacycrafting.hint.exit");
+    }
+
+    private void drawControlHint(GuiGraphicsExtractor graphics, int x, int y, int color, String key, String translationKey) {
+        int keyWidth = Math.max(9, this.font.width(key) + 4);
+        graphics.fill(x, y, x + keyWidth, y + 9, color);
+        graphics.centeredText(this.font, key, x + keyWidth / 2, y + 1, 0xFFFFFFFF);
+        graphics.text(this.font, Component.translatable(translationKey), x + keyWidth + 3, y + 1, 0xFFE0E0E0, true);
+    }
+
+    @Override
+    protected void extractSlots(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+        for (Slot slot : this.menu.slots) {
+            if (this.isPlayerInventorySlot(slot)) {
+                this.extractSlot(graphics, slot, mouseX, mouseY);
+            }
         }
     }
 
     @Override
+    protected boolean isHovering(int left, int top, int width, int height, double mouseX, double mouseY) {
+        return top >= 84 && super.isHovering(left, top, width, height, mouseX, mouseY);
+    }
+
+    @Override
+    protected boolean hasClickedOutside(double mouseX, double mouseY, int screenX, int screenY) {
+        int panelLeft = this.panelLeft();
+        int panelTop = this.panelTop();
+        return mouseX < panelLeft || mouseY < panelTop - 27
+            || mouseX >= panelLeft + PANEL_WIDTH || mouseY >= panelTop + PANEL_HEIGHT;
+    }
+
+    private boolean isPlayerInventorySlot(Slot slot) {
+        return slot.y >= 84;
+    }
+
+    @Override
     protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-        graphics.text(this.font, this.title, 8, 8, 0xFFFFFFFF, false);
-        graphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, 0xFFBBC3D1, false);
+        graphics.centeredText(
+            this.font,
+            this.selectedCategory.title(),
+            -MENU_ORIGIN_X + PANEL_WIDTH / 2,
+            -MENU_ORIGIN_Y + 14,
+            LegacyUiStyle.TEXT
+        );
+        graphics.centeredText(
+            this.font,
+            this.playerInventoryTitle,
+            -MENU_ORIGIN_X + 297,
+            -MENU_ORIGIN_Y + LOWER_PANEL_Y + 10,
+            LegacyUiStyle.TEXT
+        );
+    }
+
+    private int panelLeft() {
+        return (this.width - PANEL_WIDTH) / 2;
+    }
+
+    private int panelTop() {
+        return (this.height - PANEL_HEIGHT) / 2;
     }
 }

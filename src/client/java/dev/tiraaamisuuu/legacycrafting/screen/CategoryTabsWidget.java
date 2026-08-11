@@ -13,13 +13,14 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.CommonComponents;
 
 public final class CategoryTabsWidget extends AbstractWidget {
-    private static final int TAB_SIZE = 25;
+    private static final int TAB_WIDTH = 43;
+    private static final int TAB_HEIGHT = 29;
     private final Consumer<LegacyCategory> onSelected;
     private LegacyCategory selected = LegacyCategory.BUILDING;
     private int hoveredIndex = -1;
 
     public CategoryTabsWidget(int x, int y, Consumer<LegacyCategory> onSelected) {
-        super(x, y, LegacyCategory.values().length * TAB_SIZE, 23, CommonComponents.EMPTY);
+        super(x, y, LegacyCategory.values().length * TAB_WIDTH, TAB_HEIGHT, CommonComponents.EMPTY);
         this.onSelected = onSelected;
     }
 
@@ -32,16 +33,28 @@ public final class CategoryTabsWidget extends AbstractWidget {
         this.hoveredIndex = -1;
         LegacyCategory[] categories = LegacyCategory.values();
         for (int index = 0; index < categories.length; index++) {
-            int tabX = this.getX() + index * TAB_SIZE;
-            boolean hovered = mouseX >= tabX && mouseX < tabX + TAB_SIZE && mouseY >= this.getY() && mouseY < this.getBottom();
+            int tabX = this.getX() + index * TAB_WIDTH;
+            boolean hovered = mouseX >= tabX && mouseX < tabX + TAB_WIDTH && mouseY >= this.getY() && mouseY < this.getBottom();
             if (hovered) {
                 this.hoveredIndex = index;
             }
-            int background = categories[index] == this.selected ? 0xFFE7B85A : hovered ? 0xFF505A70 : 0xFF252A35;
-            int border = categories[index] == this.selected ? 0xFFFFE09A : 0xFF596276;
-            graphics.fill(tabX + 1, this.getY() + 1, tabX + TAB_SIZE - 1, this.getBottom() - 1, background);
-            graphics.outline(tabX, this.getY(), TAB_SIZE, this.getHeight(), border);
-            graphics.item(categories[index].icon(), tabX + 5, this.getY() + 3, index);
+            boolean selected = categories[index] == this.selected;
+            LegacyUiStyle.raisedPanel(
+                graphics,
+                tabX,
+                this.getY(),
+                TAB_WIDTH - 2,
+                TAB_HEIGHT,
+                selected ? LegacyUiStyle.PANEL_LIGHT : hovered ? 0xFFC6C6C6 : LegacyUiStyle.PANEL_DARK
+            );
+            graphics.pose().pushMatrix();
+            graphics.pose().translate(tabX + 10, this.getY() + 5);
+            graphics.pose().scale(1.25F, 1.25F);
+            graphics.item(categories[index].icon(), 0, 0, index);
+            graphics.pose().popMatrix();
+            if (selected) {
+                graphics.fill(tabX + 2, this.getBottom() - 3, tabX + TAB_WIDTH - 4, this.getBottom(), LegacyUiStyle.PANEL_LIGHT);
+            }
         }
         if (this.hoveredIndex >= 0) {
             graphics.setTooltipForNextFrame(
@@ -55,7 +68,7 @@ public final class CategoryTabsWidget extends AbstractWidget {
 
     @Override
     public void onClick(MouseButtonEvent event, boolean doubleClick) {
-        int index = ((int)event.x() - this.getX()) / TAB_SIZE;
+        int index = ((int)event.x() - this.getX()) / TAB_WIDTH;
         if (index >= 0 && index < LegacyCategory.values().length) {
             this.select(LegacyCategory.values()[index]);
         }
@@ -90,4 +103,3 @@ public final class CategoryTabsWidget extends AbstractWidget {
         output.add(NarratedElementType.USAGE, net.minecraft.network.chat.Component.translatable("legacycrafting.category.navigation"));
     }
 }
-
