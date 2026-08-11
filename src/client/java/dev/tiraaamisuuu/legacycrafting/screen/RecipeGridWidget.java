@@ -2,6 +2,7 @@ package dev.tiraaamisuuu.legacycrafting.screen;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.tiraaamisuuu.legacycrafting.recipe.BrowserRecipe;
+import dev.tiraaamisuuu.legacycrafting.recipe.RecipeView;
 import java.util.List;
 import java.util.function.Consumer;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -22,28 +23,29 @@ public final class RecipeGridWidget extends AbstractWidget {
     private static final int BORDER = 0xFF596276;
     private static final int HOVERED = 0xFF505A70;
     private static final int SELECTED = 0xFFE7B85A;
+    private static final int UNCRAFTABLE_OVERLAY = 0x99101319;
 
     private final int columns;
     private final int visibleRows;
-    private final Consumer<BrowserRecipe> onSelected;
-    private List<BrowserRecipe> recipes = List.of();
+    private final Consumer<RecipeView> onSelected;
+    private List<RecipeView> recipes = List.of();
     private int selectedIndex = -1;
     private int scrollRow;
     private int hoveredIndex = -1;
 
-    public RecipeGridWidget(int x, int y, int columns, int visibleRows, Consumer<BrowserRecipe> onSelected) {
+    public RecipeGridWidget(int x, int y, int columns, int visibleRows, Consumer<RecipeView> onSelected) {
         super(x, y, columns * CELL_SIZE, visibleRows * CELL_SIZE, CommonComponents.EMPTY);
         this.columns = columns;
         this.visibleRows = visibleRows;
         this.onSelected = onSelected;
     }
 
-    public void setRecipes(List<BrowserRecipe> recipes) {
-        int previousId = this.selectedRecipe() == null ? -1 : this.selectedRecipe().entry().id().index();
+    public void setRecipes(List<RecipeView> recipes) {
+        int previousId = this.selectedRecipe() == null ? -1 : this.selectedRecipe().recipe().entry().id().index();
         this.recipes = List.copyOf(recipes);
         this.selectedIndex = -1;
         for (int index = 0; index < this.recipes.size(); index++) {
-            if (this.recipes.get(index).entry().id().index() == previousId) {
+            if (this.recipes.get(index).recipe().entry().id().index() == previousId) {
                 this.selectedIndex = index;
                 break;
             }
@@ -57,7 +59,7 @@ public final class RecipeGridWidget extends AbstractWidget {
         }
     }
 
-    public BrowserRecipe selectedRecipe() {
+    public RecipeView selectedRecipe() {
         return this.selectedIndex >= 0 && this.selectedIndex < this.recipes.size() ? this.recipes.get(this.selectedIndex) : null;
     }
 
@@ -83,13 +85,17 @@ public final class RecipeGridWidget extends AbstractWidget {
 
             graphics.fill(cellX + 1, cellY + 1, cellX + CELL_SIZE - 1, cellY + CELL_SIZE - 1, hovered ? HOVERED : BACKGROUND);
             graphics.outline(cellX, cellY, CELL_SIZE, CELL_SIZE, recipeIndex == this.selectedIndex ? SELECTED : BORDER);
-            ItemStack output = this.recipes.get(recipeIndex).output();
+            RecipeView recipe = this.recipes.get(recipeIndex);
+            ItemStack output = recipe.recipe().output();
             graphics.item(output, cellX + ICON_OFFSET, cellY + ICON_OFFSET, recipeIndex);
             graphics.itemDecorations(net.minecraft.client.Minecraft.getInstance().font, output, cellX + ICON_OFFSET, cellY + ICON_OFFSET);
+            if (!recipe.craftable()) {
+                graphics.fill(cellX + 2, cellY + 2, cellX + CELL_SIZE - 2, cellY + CELL_SIZE - 2, UNCRAFTABLE_OVERLAY);
+            }
         }
 
         if (this.hoveredIndex >= 0) {
-            ItemStack output = this.recipes.get(this.hoveredIndex).output();
+            ItemStack output = this.recipes.get(this.hoveredIndex).recipe().output();
             graphics.setTooltipForNextFrame(net.minecraft.client.Minecraft.getInstance().font, output, mouseX, mouseY);
         }
     }
@@ -171,10 +177,9 @@ public final class RecipeGridWidget extends AbstractWidget {
 
     @Override
     protected void updateWidgetNarration(NarrationElementOutput output) {
-        BrowserRecipe selected = this.selectedRecipe();
-        Component name = selected == null ? Component.translatable("legacycrafting.recipe.none") : selected.output().getHoverName();
+        RecipeView selected = this.selectedRecipe();
+        Component name = selected == null ? Component.translatable("legacycrafting.recipe.none") : selected.recipe().output().getHoverName();
         output.add(NarratedElementType.TITLE, Component.translatable("legacycrafting.recipe.selected", name));
         output.add(NarratedElementType.USAGE, Component.translatable("legacycrafting.recipe.navigation"));
     }
 }
-

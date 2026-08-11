@@ -1,8 +1,10 @@
 {
   "legacycrafting.recipes": "Recipes",
   "legacycrafting.output_count": "Makes %s",
+  "legacycrafting.ingredient_count": "Required: %s  Available: %s",
+  "legacycrafting.filter.all": "All recipes",
+  "legacycrafting.filter.craftable": "Craftable",
   "legacycrafting.recipe.none": "No recipe selected",
   "legacycrafting.recipe.selected": "Selected recipe: %s",
   "legacycrafting.recipe.navigation": "Use the arrow keys to browse recipes"
 }
-
