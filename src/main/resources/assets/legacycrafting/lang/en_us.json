@@ -27,5 +27,6 @@
   "legacycrafting.status.inventory_full": "Inventory is full",
   "legacycrafting.status.cancelled": "Craft cancelled",
   "legacycrafting.status.timeout": "Server did not respond",
-  "legacycrafting.status.rejected": "Server rejected the craft"
+  "legacycrafting.status.rejected": "Server rejected the craft",
+  "key.legacycrafting.toggle": "Toggle Legacy crafting interface"
 }

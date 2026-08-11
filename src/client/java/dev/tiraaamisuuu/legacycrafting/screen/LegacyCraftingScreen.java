@@ -10,10 +10,14 @@ import java.util.List;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.CraftingScreen;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractCraftingMenu;
+import net.minecraft.world.inventory.CraftingMenu;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.crafting.display.RecipeDisplay;
 
 public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends AbstractContainerScreen<T> implements RecipeUpdateListener {
@@ -63,7 +67,7 @@ public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends 
             this.craftableOnly = !this.craftableOnly;
             button.setMessage(this.filterLabel());
             this.applyFilter();
-        }).bounds(this.leftPos + 84, this.topPos + 5, 84, 20).build());
+        }).bounds(this.leftPos + 8, this.topPos + 172, 160, 20).build());
         this.reloadRecipes();
         this.setInitialFocus(this.recipeGrid);
     }
@@ -105,6 +109,14 @@ public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends 
 
     private Component filterLabel() {
         return Component.translatable(this.craftableOnly ? "legacycrafting.filter.craftable" : "legacycrafting.filter.all");
+    }
+
+    public void openVanillaScreen() {
+        if (this.menu instanceof CraftingMenu craftingMenu) {
+            this.minecraft.gui.setScreen(new CraftingScreen(craftingMenu, this.minecraft.player.getInventory(), this.title));
+        } else if (this.menu instanceof InventoryMenu) {
+            this.minecraft.gui.setScreen(new InventoryScreen(this.minecraft.player));
+        }
     }
 
     @Override
