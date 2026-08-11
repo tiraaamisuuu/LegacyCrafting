@@ -1,5 +1,6 @@
 package dev.tiraaamisuuu.legacycrafting.screen;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import dev.tiraaamisuuu.legacycrafting.crafting.CraftExecutor;
 import dev.tiraaamisuuu.legacycrafting.recipe.BrowserRecipe;
 import dev.tiraaamisuuu.legacycrafting.recipe.LegacyCategory;
@@ -12,6 +13,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CraftingScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractCraftingMenu;
@@ -31,6 +33,7 @@ public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends 
     private RecipeGridWidget recipeGrid;
     private RecipeDetailsWidget recipeDetails;
     private CategoryTabsWidget categoryTabs;
+    private RecipeFilterTabsWidget filterTabs;
     private CraftExecutor craftExecutor;
     private List<BrowserRecipe> knownRecipes = List.of();
     private List<RecipeView> recipeViews = List.of();
@@ -68,12 +71,12 @@ public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends 
             this.recipeDetails::setRecipe,
             this::activateRecipe
         );
-        RecipeFilterTabsWidget filterTabs = new RecipeFilterTabsWidget(this.panelLeft() - 34, this.panelTop() + 7, craftableOnly -> {
+        this.filterTabs = new RecipeFilterTabsWidget(this.panelLeft() - 34, this.panelTop() + 7, craftableOnly -> {
             this.craftableOnly = craftableOnly;
             this.applyFilter();
         });
         this.addRenderableWidget(this.categoryTabs);
-        this.addRenderableWidget(filterTabs);
+        this.addRenderableWidget(this.filterTabs);
         this.addRenderableWidget(this.recipeGrid);
         this.addRenderableOnly(this.recipeDetails);
         this.reloadRecipes();
@@ -150,11 +153,11 @@ public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends 
             LegacyUiStyle.slot(graphics, this.leftPos + slot.x - 1, this.topPos + slot.y - 1, 18, false, false);
         }
 
-        this.drawControlHint(graphics, panelLeft, panelTop + PANEL_HEIGHT + 7, 0xFF4A9B55, "↵", "legacycrafting.hint.craft");
-        this.drawControlHint(graphics, panelLeft + 68, panelTop + PANEL_HEIGHT + 7, 0xFFD1A83B, "⇧", "legacycrafting.hint.maximum");
-        this.drawControlHint(graphics, panelLeft + 142, panelTop + PANEL_HEIGHT + 7, 0xFF4B77AE, "◆", "legacycrafting.hint.filter");
+        this.drawControlHint(graphics, panelLeft, panelTop + PANEL_HEIGHT + 7, 0xFF4A9B55, "A", "legacycrafting.hint.craft");
+        this.drawControlHint(graphics, panelLeft + 68, panelTop + PANEL_HEIGHT + 7, 0xFFD1A83B, "Y", "legacycrafting.hint.maximum");
+        this.drawControlHint(graphics, panelLeft + 142, panelTop + PANEL_HEIGHT + 7, 0xFF4B77AE, "X", "legacycrafting.hint.filter");
         this.drawControlHint(graphics, panelLeft + 251, panelTop + PANEL_HEIGHT + 7, 0xFF777777, "L", "legacycrafting.hint.vanilla");
-        this.drawControlHint(graphics, panelLeft + 342, panelTop + PANEL_HEIGHT + 7, 0xFFB64B4B, "Esc", "legacycrafting.hint.exit");
+        this.drawControlHint(graphics, panelLeft + 342, panelTop + PANEL_HEIGHT + 7, 0xFFB64B4B, "B", "legacycrafting.hint.exit");
     }
 
     private void drawControlHint(GuiGraphicsExtractor graphics, int x, int y, int color, String key, String translationKey) {
@@ -184,6 +187,27 @@ public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends 
         int panelTop = this.panelTop();
         return mouseX < panelLeft || mouseY < panelTop - 27
             || mouseX >= panelLeft + PANEL_WIDTH || mouseY >= panelTop + PANEL_HEIGHT;
+    }
+
+    @Override
+    public boolean keyPressed(KeyEvent event) {
+        if (event.key() == InputConstants.KEY_A && this.recipeGrid.selectedRecipe() != null) {
+            this.activateRecipe(this.recipeGrid.selectedRecipe(), false);
+            return true;
+        }
+        if (event.key() == InputConstants.KEY_Y && this.recipeGrid.selectedRecipe() != null) {
+            this.activateRecipe(this.recipeGrid.selectedRecipe(), true);
+            return true;
+        }
+        if (event.key() == InputConstants.KEY_X) {
+            this.filterTabs.toggle();
+            return true;
+        }
+        if (event.key() == InputConstants.KEY_B) {
+            this.onClose();
+            return true;
+        }
+        return super.keyPressed(event);
     }
 
     private boolean isPlayerInventorySlot(Slot slot) {

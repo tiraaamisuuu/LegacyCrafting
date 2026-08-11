@@ -14,7 +14,7 @@ Console Edition.
 
 - Eight recipe categories: Building, Decorations, Redstone / Mechanisms,
   Transportation, Tools, Combat, Food, and Miscellaneous
-- Scrollable recipe grid with mouse and keyboard navigation
+- Legacy Console-style horizontal recipe strip with mouse and keyboard navigation
 - Large recipe icons, output quantities, ingredient previews, and tooltips
 - Clear visual distinction between craftable and unavailable recipes
 - All Recipes and Craftable filtering
@@ -53,6 +53,10 @@ required on the server.
 - Mouse wheel: scroll recipes.
 - Arrow keys: navigate a focused recipe grid or category bar.
 - Enter or Space: craft the focused recipe.
+- `A`: craft the selected recipe once.
+- `Y`: craft the selected recipe as many times as possible.
+- `X`: toggle Craftable filtering.
+- `B`: close the crafting menu.
 - `L`: toggle the Legacy crafting interface on or off.
 - Right click: reserved for a future recipe action.
 

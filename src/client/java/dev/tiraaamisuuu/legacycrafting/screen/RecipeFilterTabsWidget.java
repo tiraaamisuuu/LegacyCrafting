@@ -26,6 +26,10 @@ public final class RecipeFilterTabsWidget extends AbstractWidget {
         this.onChanged = onChanged;
     }
 
+    public void toggle() {
+        this.select(!this.craftableOnly);
+    }
+
     @Override
     protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         this.hoveredIndex = -1;
