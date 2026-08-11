@@ -1,0 +1,180 @@
+package dev.tiraaamisuuu.legacycrafting.screen;
+
+import com.mojang.blaze3d.platform.InputConstants;
+import dev.tiraaamisuuu.legacycrafting.recipe.BrowserRecipe;
+import java.util.List;
+import java.util.function.Consumer;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.MouseButtonInfo;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
+
+public final class RecipeGridWidget extends AbstractWidget {
+    private static final int CELL_SIZE = 30;
+    private static final int ICON_OFFSET = 7;
+    private static final int BACKGROUND = 0xFF252A35;
+    private static final int BORDER = 0xFF596276;
+    private static final int HOVERED = 0xFF505A70;
+    private static final int SELECTED = 0xFFE7B85A;
+
+    private final int columns;
+    private final int visibleRows;
+    private final Consumer<BrowserRecipe> onSelected;
+    private List<BrowserRecipe> recipes = List.of();
+    private int selectedIndex = -1;
+    private int scrollRow;
+    private int hoveredIndex = -1;
+
+    public RecipeGridWidget(int x, int y, int columns, int visibleRows, Consumer<BrowserRecipe> onSelected) {
+        super(x, y, columns * CELL_SIZE, visibleRows * CELL_SIZE, CommonComponents.EMPTY);
+        this.columns = columns;
+        this.visibleRows = visibleRows;
+        this.onSelected = onSelected;
+    }
+
+    public void setRecipes(List<BrowserRecipe> recipes) {
+        int previousId = this.selectedRecipe() == null ? -1 : this.selectedRecipe().entry().id().index();
+        this.recipes = List.copyOf(recipes);
+        this.selectedIndex = -1;
+        for (int index = 0; index < this.recipes.size(); index++) {
+            if (this.recipes.get(index).entry().id().index() == previousId) {
+                this.selectedIndex = index;
+                break;
+            }
+        }
+        if (this.selectedIndex < 0 && !this.recipes.isEmpty()) {
+            this.selectedIndex = 0;
+        }
+        this.clampScroll();
+        if (this.selectedRecipe() != null) {
+            this.onSelected.accept(this.selectedRecipe());
+        }
+    }
+
+    public BrowserRecipe selectedRecipe() {
+        return this.selectedIndex >= 0 && this.selectedIndex < this.recipes.size() ? this.recipes.get(this.selectedIndex) : null;
+    }
+
+    @Override
+    protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        graphics.fill(this.getX() - 2, this.getY() - 2, this.getRight() + 2, this.getBottom() + 2, 0xFF11141B);
+        this.hoveredIndex = -1;
+        int firstIndex = this.scrollRow * this.columns;
+        int visibleCount = this.columns * this.visibleRows;
+
+        for (int visibleIndex = 0; visibleIndex < visibleCount; visibleIndex++) {
+            int recipeIndex = firstIndex + visibleIndex;
+            if (recipeIndex >= this.recipes.size()) {
+                break;
+            }
+
+            int cellX = this.getX() + visibleIndex % this.columns * CELL_SIZE;
+            int cellY = this.getY() + visibleIndex / this.columns * CELL_SIZE;
+            boolean hovered = mouseX >= cellX && mouseX < cellX + CELL_SIZE && mouseY >= cellY && mouseY < cellY + CELL_SIZE;
+            if (hovered) {
+                this.hoveredIndex = recipeIndex;
+            }
+
+            graphics.fill(cellX + 1, cellY + 1, cellX + CELL_SIZE - 1, cellY + CELL_SIZE - 1, hovered ? HOVERED : BACKGROUND);
+            graphics.outline(cellX, cellY, CELL_SIZE, CELL_SIZE, recipeIndex == this.selectedIndex ? SELECTED : BORDER);
+            ItemStack output = this.recipes.get(recipeIndex).output();
+            graphics.item(output, cellX + ICON_OFFSET, cellY + ICON_OFFSET, recipeIndex);
+            graphics.itemDecorations(net.minecraft.client.Minecraft.getInstance().font, output, cellX + ICON_OFFSET, cellY + ICON_OFFSET);
+        }
+
+        if (this.hoveredIndex >= 0) {
+            ItemStack output = this.recipes.get(this.hoveredIndex).output();
+            graphics.setTooltipForNextFrame(net.minecraft.client.Minecraft.getInstance().font, output, mouseX, mouseY);
+        }
+    }
+
+    @Override
+    protected boolean isValidClickButton(MouseButtonInfo buttonInfo) {
+        return buttonInfo.button() == 0 || buttonInfo.button() == 1;
+    }
+
+    @Override
+    public void onClick(MouseButtonEvent event, boolean doubleClick) {
+        if (event.button() != 0) {
+            return;
+        }
+        int index = this.indexAt(event.x(), event.y());
+        if (index >= 0) {
+            this.select(index);
+        }
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (!this.isMouseOver(mouseX, mouseY) || scrollY == 0.0) {
+            return false;
+        }
+        this.scrollRow -= (int)Math.signum(scrollY);
+        this.clampScroll();
+        return true;
+    }
+
+    @Override
+    public boolean keyPressed(KeyEvent event) {
+        int delta = switch (event.key()) {
+            case InputConstants.KEY_LEFT -> -1;
+            case InputConstants.KEY_RIGHT -> 1;
+            case InputConstants.KEY_UP -> -this.columns;
+            case InputConstants.KEY_DOWN -> this.columns;
+            case InputConstants.KEY_PAGEUP -> -this.columns * this.visibleRows;
+            case InputConstants.KEY_PAGEDOWN -> this.columns * this.visibleRows;
+            default -> 0;
+        };
+        if (delta != 0 && !this.recipes.isEmpty()) {
+            this.select(Math.max(0, Math.min(this.recipes.size() - 1, this.selectedIndex + delta)));
+            return true;
+        }
+        return super.keyPressed(event);
+    }
+
+    private int indexAt(double mouseX, double mouseY) {
+        int localX = (int)mouseX - this.getX();
+        int localY = (int)mouseY - this.getY();
+        if (localX < 0 || localY < 0 || localX >= this.getWidth() || localY >= this.getHeight()) {
+            return -1;
+        }
+        int index = this.scrollRow * this.columns + localY / CELL_SIZE * this.columns + localX / CELL_SIZE;
+        return index < this.recipes.size() ? index : -1;
+    }
+
+    private void select(int index) {
+        this.selectedIndex = index;
+        this.ensureSelectedVisible();
+        this.onSelected.accept(this.recipes.get(index));
+    }
+
+    private void ensureSelectedVisible() {
+        int selectedRow = this.selectedIndex / this.columns;
+        if (selectedRow < this.scrollRow) {
+            this.scrollRow = selectedRow;
+        } else if (selectedRow >= this.scrollRow + this.visibleRows) {
+            this.scrollRow = selectedRow - this.visibleRows + 1;
+        }
+        this.clampScroll();
+    }
+
+    private void clampScroll() {
+        int totalRows = (this.recipes.size() + this.columns - 1) / this.columns;
+        this.scrollRow = Math.max(0, Math.min(this.scrollRow, Math.max(0, totalRows - this.visibleRows)));
+    }
+
+    @Override
+    protected void updateWidgetNarration(NarrationElementOutput output) {
+        BrowserRecipe selected = this.selectedRecipe();
+        Component name = selected == null ? Component.translatable("legacycrafting.recipe.none") : selected.output().getHoverName();
+        output.add(NarratedElementType.TITLE, Component.translatable("legacycrafting.recipe.selected", name));
+        output.add(NarratedElementType.USAGE, Component.translatable("legacycrafting.recipe.navigation"));
+    }
+}
+

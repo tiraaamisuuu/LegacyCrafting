@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "dev.tiraaamisuuu.legacycrafting.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+    "MenuScreensMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
+
