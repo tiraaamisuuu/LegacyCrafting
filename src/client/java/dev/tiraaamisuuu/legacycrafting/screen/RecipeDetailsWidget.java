@@ -47,10 +47,14 @@ public final class RecipeDetailsWidget extends AbstractWidget {
         BrowserRecipe recipe = this.recipeView.recipe();
         int outputX = this.getX() + 8;
         int outputY = this.getY() + 8;
-        graphics.item(recipe.output(), outputX, outputY);
-        graphics.itemDecorations(minecraft.font, recipe.output(), outputX, outputY);
-        graphics.text(minecraft.font, recipe.output().getHoverName(), outputX + 22, outputY, this.recipeView.craftable() ? 0xFFFFFFFF : 0xFF8E96A5, false);
-        graphics.text(minecraft.font, Component.translatable("legacycrafting.output_count", recipe.output().getCount()), outputX + 22, outputY + 11, 0xFFBBC3D1, false);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(outputX, outputY);
+        graphics.pose().scale(2.0F, 2.0F);
+        graphics.item(recipe.output(), 0, 0);
+        graphics.itemDecorations(minecraft.font, recipe.output(), 0, 0);
+        graphics.pose().popMatrix();
+        graphics.text(minecraft.font, recipe.output().getHoverName(), outputX + 38, outputY, this.recipeView.craftable() ? 0xFFFFFFFF : 0xFF8E96A5, false);
+        graphics.text(minecraft.font, Component.translatable("legacycrafting.output_count", recipe.output().getCount()), outputX + 38, outputY + 11, 0xFFBBC3D1, false);
 
         ContextMap context = SlotDisplayContext.fromLevel(minecraft.level);
         int gridX = this.getX() + 8;
@@ -76,7 +80,7 @@ public final class RecipeDetailsWidget extends AbstractWidget {
                 }
             }
         }
-        graphics.text(minecraft.font, this.status, this.getX() + 8, this.getBottom() - 12, 0xFFE7B85A, false);
+        graphics.textWithWordWrap(minecraft.font, this.status, this.getX() + 75, this.getY() + 43, this.getWidth() - 83, 0xFFE7B85A, false);
     }
 
     @Override

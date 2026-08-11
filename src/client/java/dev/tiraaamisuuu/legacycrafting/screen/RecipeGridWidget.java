@@ -19,7 +19,6 @@ import net.minecraft.world.item.ItemStack;
 
 public final class RecipeGridWidget extends AbstractWidget {
     private static final int CELL_SIZE = 30;
-    private static final int ICON_OFFSET = 7;
     private static final int BACKGROUND = 0xFF252A35;
     private static final int BORDER = 0xFF596276;
     private static final int HOVERED = 0xFF505A70;
@@ -97,8 +96,12 @@ public final class RecipeGridWidget extends AbstractWidget {
             graphics.outline(cellX, cellY, CELL_SIZE, CELL_SIZE, recipeIndex == this.selectedIndex ? SELECTED : BORDER);
             RecipeView recipe = this.recipes.get(recipeIndex);
             ItemStack output = recipe.recipe().output();
-            graphics.item(output, cellX + ICON_OFFSET, cellY + ICON_OFFSET, recipeIndex);
-            graphics.itemDecorations(net.minecraft.client.Minecraft.getInstance().font, output, cellX + ICON_OFFSET, cellY + ICON_OFFSET);
+            graphics.pose().pushMatrix();
+            graphics.pose().translate(cellX + 5, cellY + 5);
+            graphics.pose().scale(1.25F, 1.25F);
+            graphics.item(output, 0, 0, recipeIndex);
+            graphics.itemDecorations(net.minecraft.client.Minecraft.getInstance().font, output, 0, 0);
+            graphics.pose().popMatrix();
             if (!recipe.craftable()) {
                 graphics.fill(cellX + 2, cellY + 2, cellX + CELL_SIZE - 2, cellY + CELL_SIZE - 2, UNCRAFTABLE_OVERLAY);
             }

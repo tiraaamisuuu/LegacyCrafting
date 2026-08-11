@@ -18,6 +18,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractCraftingMenu;
 import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.crafting.display.RecipeDisplay;
 
 public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends AbstractContainerScreen<T> implements RecipeUpdateListener {
@@ -135,6 +136,15 @@ public final class LegacyCraftingScreen<T extends AbstractCraftingMenu> extends 
         graphics.fill(this.leftPos, this.topPos, this.leftPos + this.imageWidth, this.topPos + this.imageHeight, 0xE6101319);
         graphics.outline(this.leftPos, this.topPos, this.imageWidth, this.imageHeight, 0xFFE7B85A);
         graphics.fill(this.leftPos + 176, this.topPos + 1, this.leftPos + 177, this.topPos + this.imageHeight - 1, 0xFF596276);
+        for (Slot slot : this.menu.slots) {
+            if (slot.x >= 176) {
+                continue;
+            }
+            int x = this.leftPos + slot.x - 1;
+            int y = this.topPos + slot.y - 1;
+            graphics.fill(x, y, x + 18, y + 18, 0xFF252A35);
+            graphics.outline(x, y, 18, 18, slot == this.menu.getResultSlot() ? 0xFFE7B85A : 0xFF596276);
+        }
     }
 
     @Override

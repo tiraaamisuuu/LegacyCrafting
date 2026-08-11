@@ -82,7 +82,9 @@ public final class CraftExecutor {
 
         if (this.state == State.WAITING_FOR_RESULT) {
             ItemStack result = this.menu.getResultSlot().getItem();
-            if (!result.isEmpty() && ItemStack.isSameItem(result, this.recipe.recipe().output())) {
+            if (this.menu.getStateId() != this.startingStateId
+                && !result.isEmpty()
+                && ItemStack.isSameItem(result, this.recipe.recipe().output())) {
                 if (!canAccept(player, result)) {
                     this.finish(Component.translatable("legacycrafting.status.inventory_full"));
                     return;
@@ -157,17 +159,20 @@ public final class CraftExecutor {
 
     private static int countMatching(LocalPlayer player, ItemStack expected) {
         return player.getInventory().getNonEquipmentItems().stream()
-            .filter(stack -> ItemStack.isSameItemSameComponents(stack, expected))
+            .filter(stack -> ItemStack.isSameItem(stack, expected))
             .mapToInt(ItemStack::getCount)
             .sum();
     }
 
     private static boolean canAccept(LocalPlayer player, ItemStack result) {
+        int capacity = 0;
         for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
             if (stack.isEmpty()) {
-                return true;
+                capacity += result.getMaxStackSize();
+            } else if (ItemStack.isSameItemSameComponents(stack, result)) {
+                capacity += stack.getMaxStackSize() - stack.getCount();
             }
-            if (ItemStack.isSameItemSameComponents(stack, result) && stack.getCount() + result.getCount() <= stack.getMaxStackSize()) {
+            if (capacity >= result.getCount()) {
                 return true;
             }
         }
@@ -180,4 +185,3 @@ public final class CraftExecutor {
         WAITING_FOR_CONFIRMATION
     }
 }
-
